@@ -11,6 +11,7 @@ import '../widgets/auth_scaffold.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/auth_button.dart';
 import 'signup_screen.dart';
+import '../../home/screens/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -47,6 +48,12 @@ class _LoginScreenState extends State<LoginScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => const HomeScreen(),
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -74,6 +81,11 @@ class _LoginScreenState extends State<LoginScreen> {
         const SnackBar(
           content: Text('Signed in successfully.'),
           behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => const HomeScreen(),
         ),
       );
     } catch (e) {

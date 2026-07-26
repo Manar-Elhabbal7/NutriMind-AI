@@ -1,0 +1,157 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    const _BlankPage(title: 'Home Screen'),
+    const _BlankPage(title: 'Scan Screen'),
+    const _BlankPage(title: 'Profile Screen'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text(
+          _currentIndex == 0
+              ? 'Home'
+              : _currentIndex == 1
+                  ? 'Scan'
+                  : 'Profile',
+          style: AppTextStyles.titleSecondary.copyWith(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
+      ),
+      body: Stack(
+        children: [
+          // Current Page Content
+          Positioned.fill(
+            child: _pages[_currentIndex],
+          ),
+          
+          // Glassmorphic Bottom Navigation Bar
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 24,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Container(
+                  height: 68,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.65),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.35),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildNavItem(0, Icons.home_rounded, 'Home'),
+                      _buildNavItem(1, Icons.qr_code_scanner_rounded, 'Scan'),
+                      _buildNavItem(2, Icons.person_rounded, 'Profile'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 80.0),
+        child: FloatingActionButton(
+          onPressed: () {},
+          backgroundColor: AppColors.secondary,
+          foregroundColor: Colors.white,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.chat_bubble_rounded),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, String label) {
+    final isSelected = _currentIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _currentIndex = index),
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppColors.secondary.withValues(alpha: 0.12)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              icon,
+              color: isSelected ? AppColors.secondary : AppColors.textSecondary,
+              size: 26,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BlankPage extends StatelessWidget {
+  const _BlankPage({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: AppColors.authBackgroundGradient,
+      ),
+      child: SafeArea(
+        child: Center(
+          child: Text(
+            title,
+            style: AppTextStyles.titleSecondary.copyWith(
+              color: AppColors.textPrimary.withValues(alpha: 0.4),
+              fontSize: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

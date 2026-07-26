@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../home/screens/home_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_form_field.dart';
@@ -50,6 +51,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute<void>(
+          builder: (_) => const HomeScreen(),
+        ),
+        (route) => false,
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -80,7 +88,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-      Navigator.of(context).pop();
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute<void>(
+          builder: (_) => const HomeScreen(),
+        ),
+        (route) => false,
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
