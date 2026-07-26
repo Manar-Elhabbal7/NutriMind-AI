@@ -15,8 +15,8 @@ class AuthBrandHeader extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             Container(
-              width: 120,
-              height: 120,
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
@@ -48,17 +48,17 @@ class AuthBrandHeader extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
         _AppTitle(),
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         Text(
           subtitle,
           textAlign: TextAlign.center,
           style: AppTextStyles.bodyRegular.copyWith(
-            fontSize: 15,
+            fontSize: 13,
             color: AppColors.textSecondary,
             fontWeight: FontWeight.w500,
-            height: 1.4,
+            height: 1.3,
           ),
         ),
       ],
@@ -70,7 +70,7 @@ class _AppTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const titleStyle = TextStyle(
-      fontSize: 32,
+      fontSize: 24,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.5,
       height: 1,

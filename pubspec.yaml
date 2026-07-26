@@ -1,5 +1,5 @@
 name: nutri_mind
-description: "A new Flutter project."
+description: "NutriMind AI"
 publish_to: 'none' 
 version: 1.0.0+1
 
@@ -16,6 +16,8 @@ dependencies:
   google_sign_in: ^6.3.0
   nutrition_ai: ^3.3.0
   flutter_launcher_icons: ^0.14.4
+  firebase_core: ^4.12.1
+  firebase_auth: ^6.5.6
 
 dev_dependencies:
   flutter_test:

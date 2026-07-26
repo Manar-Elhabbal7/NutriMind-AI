@@ -37,20 +37,21 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isGoogleLoading = true);
     try {
-      final account = await AuthService.instance.signInWithGoogle();
-      if (!mounted || account == null) return;
+      final userCredential = await AuthService.instance.signInWithGoogle();
+      if (!mounted || userCredential == null || userCredential.user == null) return;
 
+      final user = userCredential.user!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Welcome, ${account.displayName ?? account.email}!'),
+          content: Text('Welcome, ${user.displayName ?? user.email}!'),
           behavior: SnackBarBehavior.floating,
         ),
       );
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Google sign-in failed. Please try again.'),
+        SnackBar(
+          content: Text(e.toString().split(']').last.trim()),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -63,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    Future.delayed(const Duration(milliseconds: 900), () {
+    Future.delayed(const Duration(milliseconds: 1000), () {
       if (!mounted) return;
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -80,14 +81,12 @@ class _LoginScreenState extends State<LoginScreen> {
     return AuthScaffold(
       child: Column(
         children: [
+          const SizedBox(height: 24),
           AuthBrandHeader(
                 subtitle:
                     'Welcome back! Sign in to continue your nutrition journey',
-              )
-              .animate()
-              .fade(duration: 500.ms)
-              .slideY(begin: 0.08, end: 0, curve: Curves.easeOut),
-          const SizedBox(height: 20),
+              ),
+          const SizedBox(height: 16),
           AuthFormCard(
                 child: Form(
                   key: _formKey,
@@ -100,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       AppFormField(
                         controller: _emailController,
                         hintText: 'elhabbal@gmail.com',
@@ -120,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 14),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -147,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       AppFormField(
                         controller: _passwordController,
                         hintText: 'Enter your password',
@@ -178,15 +177,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 16),
                       AuthButton(
                         text: 'Sign In',
                         isLoading: _isLoading,
                         onPressed: _handleSignIn,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       const AuthDivider(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       GoogleSignInButton(
                         isLoading: _isGoogleLoading,
                         onPressed: _handleGoogleSignIn,
@@ -198,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
               .animate()
               .fade(delay: 150.ms, duration: 600.ms)
               .slideY(begin: 0.08, end: 0, curve: Curves.easeOut),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

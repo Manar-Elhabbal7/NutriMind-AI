@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "563646488257",
+    "project_id": "nutrimind-ec817",
+    "storage_bucket": "nutrimind-ec817.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:563646488257:android:80301046032e74206cbe40",
+        "android_client_info": {
+          "package_name": "com.example.nutri_mind"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "563646488257-f9cssid1l71s3l8elrn18g24p7sevs86.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANN9QwWbgRz1b-N7eEHNoMek0EdBAlr-w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "563646488257-f9cssid1l71s3l8elrn18g24p7sevs86.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "563646488257-9lomfvtnuj2pqmnuiilnug2ri0b5o58e.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nutriMind"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

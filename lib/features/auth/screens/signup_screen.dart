@@ -40,20 +40,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isGoogleLoading = true);
     try {
-      final account = await AuthService.instance.signInWithGoogle();
-      if (!mounted || account == null) return;
+      final userCredential = await AuthService.instance.signInWithGoogle();
+      if (!mounted || userCredential == null || userCredential.user == null) return;
 
+      final user = userCredential.user!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Welcome, ${account.displayName ?? account.email}!'),
+          content: Text('Welcome, ${user.displayName ?? user.email}!'),
           behavior: SnackBarBehavior.floating,
         ),
       );
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Google sign-in failed. Please try again.'),
+        SnackBar(
+          content: Text(e.toString().split(']').last.trim()),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -84,6 +85,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       showBackButton: true,
       child: Column(
         children: [
+          const SizedBox(height: 24),
           AuthBrandHeader(
             subtitle: 'Create your account to start your nutrition journey.',
           ),

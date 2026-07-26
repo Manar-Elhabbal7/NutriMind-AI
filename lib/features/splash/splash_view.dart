@@ -23,7 +23,7 @@ class _SplashViewState extends State<SplashView> {
   }
 
   void _navigateToNextScreen() {
-    _navigateTimer = Timer(const Duration(milliseconds: 3200), () {
+    _navigateTimer = Timer(const Duration(seconds: 4), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
@@ -33,7 +33,7 @@ class _SplashViewState extends State<SplashView> {
                 (context, animation, secondaryAnimation, child) {
                   return FadeTransition(opacity: animation, child: child);
                 },
-            transitionDuration: const Duration(milliseconds: 800),
+            transitionDuration: const Duration(milliseconds: 1000),
           ),
         );
       }
