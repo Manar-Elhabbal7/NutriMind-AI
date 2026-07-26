@@ -34,7 +34,7 @@ class AuthButton extends StatelessWidget {
           onTap: isLoading ? null : onPressed,
           borderRadius: BorderRadius.circular(16),
           child: SizedBox(
-            height: 54,
+            height: 48,
             width: double.infinity,
             child: Center(
               child: isLoading

@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
 class AuthFormCard extends StatelessWidget {
-  const AuthFormCard({super.key, required this.child});
+  const AuthFormCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(24),
+  });
 
   final Widget child;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(28),

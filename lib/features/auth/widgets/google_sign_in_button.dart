@@ -34,7 +34,7 @@ class GoogleSignInButton extends StatelessWidget {
             ],
           ),
           child: SizedBox(
-            height: 54,
+            height: 48,
             width: double.infinity,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

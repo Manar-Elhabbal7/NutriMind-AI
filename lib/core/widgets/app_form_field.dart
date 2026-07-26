@@ -43,7 +43,7 @@ class AppFormField extends StatelessWidget {
         filled: true,
         fillColor: AppColors.fill,
         contentPadding: const EdgeInsets.symmetric(
-          vertical: 16.0,
+          vertical: 12.0,
           horizontal: 20.0,
         ),
         enabledBorder: OutlineInputBorder(

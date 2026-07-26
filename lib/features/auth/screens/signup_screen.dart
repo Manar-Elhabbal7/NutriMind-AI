@@ -85,12 +85,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       showBackButton: true,
       child: Column(
         children: [
-          const SizedBox(height: 24),
           AuthBrandHeader(
-            subtitle: 'Create your account to start your nutrition journey.',
+            subtitle: 'Create your account to start your journey',
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           AuthFormCard(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Form(
               key: _formKey,
               child: Column(
@@ -102,14 +102,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 3),
                   AppFormField(
                     controller: _nameController,
                     hintText: 'Manar Elhabbal',
                     prefixIcon: const Icon(
                       Icons.person_outline_rounded,
                       color: AppColors.secondary,
-                      size: 20,
+                      size: 18,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -118,14 +118,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 10),
                   Text(
                     'Email',
                     style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 3),
                   AppFormField(
                     controller: _emailController,
                     hintText: 'elhabbal@gmail.com',
@@ -133,7 +133,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     prefixIcon: const Icon(
                       Icons.mail_outline_rounded,
                       color: AppColors.secondary,
-                      size: 20,
+                      size: 18,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -145,14 +145,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 10),
                   Text(
                     'Password',
                     style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 3),
                   AppFormField(
                     controller: _passwordController,
                     hintText: 'Create a password',
@@ -160,7 +160,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     prefixIcon: const Icon(
                       Icons.lock_outline_rounded,
                       color: AppColors.secondary,
-                      size: 20,
+                      size: 18,
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -168,7 +168,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
                         color: AppColors.textSecondary,
-                        size: 20,
+                        size: 18,
                       ),
                       onPressed: () {
                         setState(() => _obscurePassword = !_obscurePassword);
@@ -181,14 +181,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 10),
                   Text(
                     'Confirm Password',
                     style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 3),
                   AppFormField(
                     controller: _confirmPasswordController,
                     hintText: 'Confirm Password',
@@ -196,7 +196,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     prefixIcon: const Icon(
                       Icons.lock_outline_rounded,
                       color: AppColors.secondary,
-                      size: 20,
+                      size: 18,
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -204,7 +204,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
                         color: AppColors.textSecondary,
-                        size: 20,
+                        size: 18,
                       ),
                       onPressed: () {
                         setState(
@@ -220,15 +220,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 14),
                   AuthButton(
                     text: 'Create Account',
                     isLoading: _isLoading,
                     onPressed: _handleSignUp,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   const AuthDivider(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   GoogleSignInButton(
                     isLoading: _isGoogleLoading,
                     onPressed: _handleGoogleSignIn,
@@ -237,7 +237,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
