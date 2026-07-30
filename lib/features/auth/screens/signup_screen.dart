@@ -60,9 +60,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+      String message = e.toString().split(']').last.trim();
+      if (message.toLowerCase().contains('no firebase') ||
+          message.toLowerCase().contains('initializ')) {
+        message = 'Authentication service is currently unavailable. Please check your setup.';
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString().split(']').last.trim()),
+          content: Text(message),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -84,21 +89,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Account created successfully.'),
+          content: Text('Successfully registered! Please sign in.'),
           behavior: SnackBarBehavior.floating,
         ),
       );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute<void>(
-          builder: (_) => const HomeScreen(),
-        ),
-        (route) => false,
-      );
+      Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
+      String message = e.toString().split(']').last.trim();
+      if (message.toLowerCase().contains('no firebase') ||
+          message.toLowerCase().contains('initializ')) {
+        message = 'Authentication service is currently unavailable. Please check your setup.';
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString().split(']').last.trim()),
+          content: Text(message),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -113,10 +118,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       showBackButton: true,
       child: Column(
         children: [
+          const Spacer(flex: 2),
           AuthBrandHeader(
             subtitle: 'Create your account to start your journey',
           ),
-          const SizedBox(height: 10),
+          const Spacer(flex: 1),
           AuthFormCard(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Form(
@@ -265,7 +271,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const Spacer(flex: 2),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -288,6 +294,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ],
           ),
+          const Spacer(flex: 1),
         ],
       ),
     );

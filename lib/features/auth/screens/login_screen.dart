@@ -56,9 +56,14 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+      String message = e.toString().split(']').last.trim();
+      if (message.toLowerCase().contains('no firebase') ||
+          message.toLowerCase().contains('initializ')) {
+        message = 'Authentication service is currently unavailable. Please check your setup.';
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString().split(']').last.trim()),
+          content: Text(message),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -90,9 +95,14 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+      String message = e.toString().split(']').last.trim();
+      if (message.toLowerCase().contains('no firebase') ||
+          message.toLowerCase().contains('initializ')) {
+        message = 'Authentication service is currently unavailable. Please check your setup.';
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString().split(']').last.trim()),
+          content: Text(message),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -106,12 +116,12 @@ class _LoginScreenState extends State<LoginScreen> {
     return AuthScaffold(
       child: Column(
         children: [
-          const SizedBox(height: 24),
+          const Spacer(flex: 2),
           AuthBrandHeader(
                 subtitle:
                     'Welcome back! Sign in to continue your nutrition journey',
               ),
-          const SizedBox(height: 16),
+          const Spacer(flex: 1),
           AuthFormCard(
                 child: Form(
                   key: _formKey,
@@ -222,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
               .animate()
               .fade(delay: 150.ms, duration: 600.ms)
               .slideY(begin: 0.08, end: 0, curve: Curves.easeOut),
-          const SizedBox(height: 16),
+          const Spacer(flex: 2),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -251,6 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
+          const Spacer(flex: 1),
         ],
       ),
     );

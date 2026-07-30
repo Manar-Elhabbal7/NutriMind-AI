@@ -18,6 +18,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   firebase_core: ^4.12.1
   firebase_auth: ^6.5.6
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +35,4 @@ flutter:
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
-  image_path: "assets/images/icon.png"
-  adaptive_icon_background: "#ffffff"
-  adaptive_icon_foreground: "assets/images/icon.png"
+  image_path: "assets/images/logo.jpg"
