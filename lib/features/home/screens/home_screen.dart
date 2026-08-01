@@ -1,7 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../chat/chat_screen.dart';
+
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
     const _BlankPage(title: 'Home Screen'),
     const _BlankPage(title: 'Scan Screen'),
-    const _BlankPage(title: 'Profile Screen'),
+    const ProfileScreen(),
   ];
 
   @override
@@ -91,7 +95,14 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 80.0),
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SupportChatScreen(),
+              ),
+            );
+          },
           backgroundColor: AppColors.secondary,
           foregroundColor: Colors.white,
           shape: const CircleBorder(),
@@ -110,18 +121,35 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppColors.secondary.withValues(alpha: 0.12)
+                  ? AppColors.primary.withValues(alpha: 0.12)
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(
-              icon,
-              color: isSelected ? AppColors.secondary : AppColors.textSecondary,
-              size: 26,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                  size: 24,
+                ),
+                if (isSelected) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ).animate().fadeIn(duration: 150.ms).slideX(begin: -0.1, end: 0),
+                ],
+              ],
             ),
           ),
         ],
