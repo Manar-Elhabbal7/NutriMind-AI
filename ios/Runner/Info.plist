@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>NutriMind needs camera access to scan food and ingredients.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>NutriMind needs microphone access for recording scans.</string>
 </dict>
 </plist>

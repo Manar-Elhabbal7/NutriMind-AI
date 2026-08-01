@@ -731,34 +731,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     const SizedBox(height: 24),
 
-                    // 3. Save Button
+                    // 3. Action Buttons Row
                     if (_isSaving)
-                      const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondary),
+                      const Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondary),
+                        ),
                       )
                     else
-                      AppButton(
-                        text: 'Save Changes',
-                        onPressed: _saveProfileData,
-                        backgroundColor: AppColors.secondary,
-                        borderRadius: 14,
-                        height: 50,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 50,
+                              child: AppButton(
+                                text: 'Save Changes',
+                                onPressed: _saveProfileData,
+                                backgroundColor: AppColors.secondary,
+                                borderRadius: 14,
+                                height: 50,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: SizedBox(
+                              height: 50,
+                              child: OutlinedButton.icon(
+                                onPressed: _handleSignOut,
+                                icon: const Icon(Icons.logout_rounded, color: AppColors.secondary, size: 16),
+                                label: Text(
+                                  'Sign Out',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.secondary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(color: AppColors.secondary, width: 1.5),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ).animate().fade(delay: 200.ms).scale(begin: const Offset(0.95, 0.95), end: const Offset(1, 1), duration: 350.ms),
-
-                    const SizedBox(height: 12),
-
-                    // 4. Sign Out Button
-                    TextButton.icon(
-                      onPressed: _handleSignOut,
-                      icon: const Icon(Icons.logout_rounded, color: AppColors.secondary, size: 18),
-                      label: Text(
-                        'Sign Out',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.secondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ).animate().fade(delay: 250.ms),
 
                     // Padding for bottom nav bar overlay
                     const SizedBox(height: 120),

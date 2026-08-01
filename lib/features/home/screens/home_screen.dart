@@ -6,6 +6,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../chat/chat_screen.dart';
 
 import 'profile_screen.dart';
+import '../../scan/screens/scan_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,9 +18,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
+  List<Widget> get _pages => [
     const _BlankPage(title: 'Home Screen'),
-    const _BlankPage(title: 'Scan Screen'),
+    const ScanScreen(),
     const ProfileScreen(),
   ];
 
@@ -27,24 +28,22 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: _currentIndex == 2
-            ? null
-            : Text(
-                _currentIndex == 0
-                    ? 'Home'
-                    : 'Scan',
+      appBar: (_currentIndex == 1 || _currentIndex == 2)
+          ? null
+          : AppBar(
+              title: Text(
+                'Home',
                 style: AppTextStyles.titleSecondary.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
-      ),
+              centerTitle: true,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              automaticallyImplyLeading: false,
+            ),
       body: Stack(
         children: [
           // Current Page Content
@@ -64,16 +63,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   height: 68,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.65),
+                    color: Colors.white.withValues(alpha: 0.88),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.35),
+                      color: AppColors.secondary.withValues(alpha: 0.25),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 20,
+                        color: AppColors.secondary.withValues(alpha: 0.08),
+                        blurRadius: 24,
                         offset: const Offset(0, 8),
                       ),
                     ],

@@ -23,7 +23,7 @@ class _SplashViewState extends State<SplashView> {
   }
 
   void _navigateToNextScreen() {
-    _navigateTimer = Timer(const Duration(seconds: 4), () {
+    _navigateTimer = Timer(const Duration(seconds: 3), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
