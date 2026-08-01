@@ -656,7 +656,7 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
     final size = MediaQuery.of(context).size;
 
     return Container(
-      height: size.height * 0.88,
+      height: size.height * 0.80,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(

@@ -370,31 +370,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // Outer white circular border
+                        // Outer white circular border containing full profile photo
                         Container(
                           width: 145,
                           height: 145,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
-                            boxShadow: [
+                            border: Border.all(color: Colors.white, width: 4),
+                            boxShadow: const [
                               BoxShadow(
                                 color: Colors.black12,
                                 blurRadius: 10,
                                 offset: Offset(0, 4),
                               ),
                             ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                  image: _buildImageProvider(_profilePhotoPath, true),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                            image: DecorationImage(
+                              image: _buildImageProvider(_profilePhotoPath, true),
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
