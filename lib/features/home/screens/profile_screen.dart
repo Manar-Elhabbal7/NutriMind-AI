@@ -35,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // Defaults
   static const String _defaultProfilePhoto = 'assets/images/girl.png';
-  static const String _defaultBannerPhoto = 'assets/images/profile_background.jpeg';
+  static const String _defaultBannerPhoto = 'assets/images/profile_background1.jpeg';
 
   @override
   void initState() {

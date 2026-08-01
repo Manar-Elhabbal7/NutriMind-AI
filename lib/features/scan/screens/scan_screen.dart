@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
@@ -25,6 +26,7 @@ class _ScanScreenState extends State<ScanScreen> {
   String _errorMsg = '';
   final ImagePicker _picker = ImagePicker();
   final Dio _dio = Dio();
+  XFile? _previewPhoto;
 
   // Focus properties
   Offset? _tapPosition;
@@ -194,21 +196,52 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   void _showScanResultsBottomSheet(XFile photoFile) {
+    setState(() {
+      _previewPhoto = photoFile;
+    });
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.25),
       builder: (context) {
-        return _ScanResultDetailsSheet(
-          photo: photoFile,
-          dio: _dio,
+        return ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: _ScanResultDetailsSheet(
+              photo: photoFile,
+              dio: _dio,
+            ),
+          ),
         );
       },
-    );
+    ).then((_) {
+      if (mounted) {
+        setState(() {
+          _previewPhoto = null;
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_previewPhoto != null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: SizedBox.expand(
+          child: kIsWeb
+              ? Image.network(_previewPhoto!.path, fit: BoxFit.cover)
+              : Image.file(File(_previewPhoto!.path), fit: BoxFit.cover),
+        ),
+      );
+    }
+
     if (!_isCameraReady || _hasError) {
       return Scaffold(
         backgroundColor: Colors.black,
