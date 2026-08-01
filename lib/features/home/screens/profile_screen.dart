@@ -110,7 +110,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (user != null) {
         await user.updateDisplayName(_nameController.text.trim());
         if (_profilePhotoPath.isNotEmpty && !_profilePhotoPath.startsWith('assets/')) {
-          await user.updatePhotoURL(_profilePhotoPath);
+          try {
+            await user.updatePhotoURL(_profilePhotoPath);
+          } catch (e) {
+            debugPrint('Failed to update photo URL in Firebase Auth: $e');
+          }
         }
         await user.reload();
       }
@@ -153,10 +157,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   /// Select profile photo using ImagePicker
   Future<void> _pickProfilePhoto() async {
+    if (kIsWeb) {
+      await _pickProfilePhotoFromSource(ImageSource.gallery);
+      return;
+    }
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library_rounded, color: AppColors.secondary),
+                title: const Text('Choose from Gallery'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _pickProfilePhotoFromSource(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_rounded, color: AppColors.secondary),
+                title: const Text('Take a Photo'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _pickProfilePhotoFromSource(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickProfilePhotoFromSource(ImageSource source) async {
     final picker = ImagePicker();
     try {
       final XFile? pickedFile = await picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         maxWidth: 500,
         maxHeight: 500,
         imageQuality: 85,
@@ -170,8 +212,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       debugPrint('Error picking profile image: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not access image gallery.'),
+          SnackBar(
+            content: Text(source == ImageSource.camera
+                ? 'Could not access camera.'
+                : 'Could not access image gallery.'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -209,37 +253,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   /// Handles user sign out
   Future<void> _handleSignOut() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Sign Out', style: AppTextStyles.titleSecondary.copyWith(fontSize: 20)),
-        content: Text('Are you sure you want to sign out of NutriMind?', style: AppTextStyles.bodyRegular),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Sign Out'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      await AuthService.instance.signOut();
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
-          (route) => false,
-        );
-      }
+    await AuthService.instance.signOut();
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
     }
   }
 
@@ -271,7 +290,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondary),
           ),
         ),
       );
@@ -291,7 +310,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 GestureDetector(
                   onTap: _pickBannerPhoto,
                   child: Container(
-                    height: 200,
+                    height: 180,
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: AppColors.primaryExtraLight,
@@ -345,7 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 
                 // Profile image overlapping the banner
                 Positioned(
-                  bottom: -55,
+                  bottom: -72,
                   child: GestureDetector(
                     onTap: _pickProfilePhoto,
                     child: Stack(
@@ -353,8 +372,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         // Outer white circular border
                         Container(
-                          width: 116,
-                          height: 116,
+                          width: 145,
+                          height: 145,
                           decoration: const BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
@@ -381,8 +400,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         // Camera Badge
                         Positioned(
-                          bottom: 0,
-                          right: 2,
+                          bottom: 4,
+                          right: 4,
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: const BoxDecoration(
@@ -410,7 +429,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
             
-            const SizedBox(height: 65),
+            const SizedBox(height: 80),
 
             // Form Content
             Padding(
@@ -419,7 +438,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Display Name Input (with Pin / edit Icon)
+                    // Display Name Input
                     TextFormField(
                       controller: _nameController,
                       style: AppTextStyles.titleSecondary.copyWith(
@@ -430,14 +449,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       decoration: InputDecoration(
                         hintText: 'Enter your name',
                         hintStyle: AppTextStyles.hintStyle.copyWith(fontSize: 18),
-                        suffixIcon: const Padding(
-                          padding: EdgeInsets.only(right: 12.0),
-                          child: Icon(
-                            Icons.push_pin_rounded,
-                            color: AppColors.secondary,
-                            size: 20,
-                          ),
-                        ),
                         border: InputBorder.none,
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: AppColors.secondary.withValues(alpha: 0.5), width: 1.5),
@@ -463,11 +474,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ).animate().fade().slideY(begin: 0.1, end: 0, delay: 50.ms, duration: 300.ms),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     // 2. Physical Metrics Card
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
@@ -491,7 +502,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: AppColors.textPrimary,
                             ),
                           ),
-                          const Divider(height: 24, color: AppColors.divider),
+                          const Divider(height: 20, color: AppColors.divider),
 
                           // Gender Selection Box
                           Text(
@@ -511,7 +522,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   onTap: () => setState(() => _gender = 'Female'),
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 250),
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
                                     decoration: BoxDecoration(
                                       color: _gender == 'Female'
                                           ? AppColors.primaryExtraLight
@@ -519,7 +530,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
                                         color: _gender == 'Female'
-                                            ? AppColors.primary.withValues(alpha: 0.5)
+                                            ? AppColors.secondary.withValues(alpha: 0.5)
                                             : Colors.transparent,
                                         width: 1.5,
                                       ),
@@ -529,20 +540,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         Icon(
                                           Icons.female_rounded,
                                           color: _gender == 'Female'
-                                              ? AppColors.primary
+                                              ? AppColors.secondary
                                               : AppColors.textSecondary,
-                                          size: 26,
+                                          size: 24,
                                         ),
-                                        const SizedBox(height: 4),
+                                        const SizedBox(height: 2),
                                         Text(
                                           'Female',
                                           style: AppTextStyles.bodyMedium.copyWith(
                                             color: _gender == 'Female'
-                                                ? AppColors.primary
+                                                ? AppColors.secondary
                                                 : AppColors.textSecondary,
                                             fontWeight: _gender == 'Female'
                                                 ? FontWeight.bold
                                                 : FontWeight.w500,
+                                            fontSize: 12,
                                           ),
                                         ),
                                       ],
@@ -550,14 +562,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              const SizedBox(width: 12),
                               // Male Option
                               Expanded(
                                 child: GestureDetector(
                                   onTap: () => setState(() => _gender = 'Male'),
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 250),
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
                                     decoration: BoxDecoration(
                                       color: _gender == 'Male'
                                           ? AppColors.secondaryExtraLight
@@ -577,9 +589,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           color: _gender == 'Male'
                                               ? AppColors.secondary
                                               : AppColors.textSecondary,
-                                          size: 26,
+                                          size: 24,
                                         ),
-                                        const SizedBox(height: 4),
+                                        const SizedBox(height: 2),
                                         Text(
                                           'Male',
                                           style: AppTextStyles.bodyMedium.copyWith(
@@ -589,6 +601,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             fontWeight: _gender == 'Male'
                                                 ? FontWeight.bold
                                                 : FontWeight.w500,
+                                            fontSize: 12,
                                           ),
                                         ),
                                       ],
@@ -599,131 +612,149 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                           
-                          const SizedBox(height: 20),
-
-                          // Height (Length) Field
-                          Text(
-                            'Height',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          TextFormField(
-                            controller: _heightController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-                            decoration: InputDecoration(
-                              hintText: '165',
-                              hintStyle: AppTextStyles.hintStyle,
-                              filled: true,
-                              fillColor: AppColors.fill,
-                              prefixIcon: const Icon(Icons.height_rounded, color: AppColors.textSecondary, size: 20),
-                              suffixText: 'cm',
-                              suffixStyle: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.border, width: 1),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter your height';
-                              }
-                              if (double.tryParse(value) == null) {
-                                return 'Enter a valid number';
-                              }
-                              return null;
-                            },
-                          ),
-
                           const SizedBox(height: 16),
 
-                          // Weight Field
-                          Text(
-                            'Weight',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          TextFormField(
-                            controller: _weightController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-                            decoration: InputDecoration(
-                              hintText: '60',
-                              hintStyle: AppTextStyles.hintStyle,
-                              filled: true,
-                              fillColor: AppColors.fill,
-                              prefixIcon: const Icon(Icons.scale_rounded, color: AppColors.textSecondary, size: 20),
-                              suffixText: 'kg',
-                              suffixStyle: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.bold,
+                          // Height & Weight Side-by-Side Row
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Height (Length) Field
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Height',
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        fontSize: 13,
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    TextFormField(
+                                      controller: _heightController,
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                      style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                                      decoration: InputDecoration(
+                                        hintText: '165',
+                                        hintStyle: AppTextStyles.hintStyle,
+                                        filled: true,
+                                        fillColor: AppColors.fill,
+                                        prefixIcon: const Icon(Icons.height_rounded, color: AppColors.textSecondary, size: 20),
+                                        suffixText: 'cm',
+                                        suffixStyle: AppTextStyles.bodyMedium.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(color: AppColors.border, width: 1),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(color: AppColors.secondary, width: 1.5),
+                                        ),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.trim().isEmpty) {
+                                          return 'Enter height';
+                                        }
+                                        if (double.tryParse(value) == null) {
+                                          return 'Invalid number';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.border, width: 1),
+                              const SizedBox(width: 16),
+                              // Weight Field
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Weight',
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        fontSize: 13,
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    TextFormField(
+                                      controller: _weightController,
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                      style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                                      decoration: InputDecoration(
+                                        hintText: '60',
+                                        hintStyle: AppTextStyles.hintStyle,
+                                        filled: true,
+                                        fillColor: AppColors.fill,
+                                        prefixIcon: const Icon(Icons.scale_rounded, color: AppColors.textSecondary, size: 20),
+                                        suffixText: 'kg',
+                                        suffixStyle: AppTextStyles.bodyMedium.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(color: AppColors.border, width: 1),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(color: AppColors.secondary, width: 1.5),
+                                        ),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.trim().isEmpty) {
+                                          return 'Enter weight';
+                                        }
+                                        if (double.tryParse(value) == null) {
+                                          return 'Invalid number';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter your weight';
-                              }
-                              if (double.tryParse(value) == null) {
-                                return 'Enter a valid number';
-                              }
-                              return null;
-                            },
+                            ],
                           ),
                         ],
                       ),
                     ).animate().fade(delay: 150.ms).slideY(begin: 0.08, end: 0, duration: 400.ms),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     // 3. Save Button
                     if (_isSaving)
                       const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondary),
                       )
                     else
                       AppButton(
                         text: 'Save Changes',
                         onPressed: _saveProfileData,
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: AppColors.secondary,
                         borderRadius: 14,
-                        height: 52,
+                        height: 50,
                       ).animate().fade(delay: 200.ms).scale(begin: const Offset(0.95, 0.95), end: const Offset(1, 1), duration: 350.ms),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
                     // 4. Sign Out Button
                     TextButton.icon(
                       onPressed: _handleSignOut,
-                      icon: const Icon(Icons.logout_rounded, color: AppColors.error, size: 18),
+                      icon: const Icon(Icons.logout_rounded, color: AppColors.secondary, size: 18),
                       label: Text(
                         'Sign Out',
                         style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.error,
+                          color: AppColors.secondary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

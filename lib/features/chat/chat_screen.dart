@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:chat_bubbles/chat_bubbles.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 
@@ -74,22 +74,14 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final Dio _dio = Dio();
 
-  String _sessionId = '';
-  String _webhookUrl = '';
   bool _isLoading = false;
 
-  static const String _prefWebhookKey = 'n8n_webhook_url';
-  static const String _prefSessionKey = 'n8n_session_id';
   static const String _prefHistoryKey = 'n8n_chat_history';
 
-  static const String _defaultUrl = 'https://thegoat7.app.n8n.cloud/webhook/insight360-support';
-
   final List<_QuickReplyItem> _quickReplies = const [
-    _QuickReplyItem("What is NutriMind?", Icons.help_outline_rounded),
-    _QuickReplyItem("Plan a healthy meal", Icons.restaurant_menu_rounded),
-    _QuickReplyItem("How do I scan ingredients?", Icons.qr_code_scanner_rounded),
-    _QuickReplyItem("Tips for mindful eating", Icons.psychology_outlined),
-    _QuickReplyItem("Track my water intake", Icons.local_drink_rounded),
+    _QuickReplyItem("How to count calories", Icons.calculate_rounded),
+    _QuickReplyItem("How many liters of water I need to drink daily", Icons.local_drink_rounded),
+    _QuickReplyItem("Suggest sports or exercises to do at home", Icons.fitness_center_rounded),
   ];
 
   @override
@@ -107,17 +99,6 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
 
   Future<void> _loadSettingsAndHistory() async {
     final prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      _webhookUrl = prefs.getString(_prefWebhookKey) ?? _defaultUrl;
-    });
-
-    String? storedSessionId = prefs.getString(_prefSessionKey);
-    if (storedSessionId == null || storedSessionId.isEmpty) {
-      storedSessionId = 'session_${DateTime.now().millisecondsSinceEpoch}_${math.Random().nextInt(9999)}';
-      await prefs.setString(_prefSessionKey, storedSessionId);
-    }
-    _sessionId = storedSessionId;
 
     // Load chat history
     final historyJson = prefs.getStringList(_prefHistoryKey);
@@ -157,28 +138,15 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_prefHistoryKey);
 
-    // Generate new Session ID
-    final newSessionId = 'session_${DateTime.now().millisecondsSinceEpoch}_${math.Random().nextInt(9999)}';
-    await prefs.setString(_prefSessionKey, newSessionId);
-
     setState(() {
-      _sessionId = newSessionId;
       _messages.clear();
       _messages.add(
         ChatMessage(
-          text: "Conversation cleared. How can I help you today?",
+          text: "Hello! I am your NutriMind AI Coach. 🍏\n\nI can help you build healthy nutrition habits, scan food items, plan recipes, and support your mental wellness. How can I help you today?",
           isUser: false,
           timestamp: DateTime.now(),
         ),
       );
-    });
-  }
-
-  Future<void> _saveWebhookUrl(String newUrl) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefWebhookKey, newUrl);
-    setState(() {
-      _webhookUrl = newUrl;
     });
   }
   
@@ -213,13 +181,30 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
     _scrollToBottom();
     await _saveHistory();
 
-    // Call n8n Webhook
+    // Convert messages to Gemini format
+    final List<Map<String, dynamic>> contents = [];
+    for (var msg in _messages) {
+      contents.add({
+        'role': msg.isUser ? 'user' : 'model',
+        'parts': [
+          {'text': msg.text}
+        ],
+      });
+    }
+
+    // Call Gemini API
     try {
       final response = await _dio.post(
-        _webhookUrl,
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=YOUR_API_KEY',
         data: {
-          'message': text,
-          'session_id': _sessionId,
+          'contents': contents,
+          'systemInstruction': {
+            'parts': [
+              {
+                'text': 'You are NutriMind AI Coach.🍏 You help users build healthy nutrition habits, scan food items, plan recipes, and support mental wellness. Keep your responses friendly, encouraging, and clear.'
+              }
+            ]
+          }
         },
         options: Options(
           headers: {
@@ -231,26 +216,22 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
       );
 
       String botReply = '';
-      if (response.data != null) {
-        if (response.data is Map) {
-          botReply = response.data['reply'] ??
-              response.data['output'] ??
-              response.data['response'] ??
-              response.data['message'] ??
-              response.data['text'] ??
-              '';
-        } else if (response.data is List && response.data.isNotEmpty) {
-          final first = response.data.first;
-          botReply = first is Map
-              ? (first['reply'] ?? first['output'] ?? first['response'] ?? first['message'] ?? first['text'] ?? '')
-              : first.toString();
-        } else {
-          botReply = response.data.toString();
+      if (response.data != null && response.data['candidates'] != null) {
+        final candidates = response.data['candidates'] as List;
+        if (candidates.isNotEmpty) {
+          final firstCandidate = candidates.first;
+          final content = firstCandidate['content'];
+          if (content != null) {
+            final parts = content['parts'] as List;
+            if (parts.isNotEmpty) {
+              botReply = parts.first['text'] ?? '';
+            }
+          }
         }
       }
 
       if (botReply.isEmpty) {
-        botReply = "I received an empty response from the support workflow.";
+        botReply = "I received an empty response. Please try again.";
       }
 
       setState(() {
@@ -264,17 +245,9 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
         );
       });
     } on DioException catch (e) {
-      String errorMessage = "Network error: Failed to connect to support workflow.";
+      String errorMessage = "Network error: Failed to connect to NutriMind AI Coach.";
       if (e.response != null) {
-        if (e.response!.statusCode == 404) {
-          errorMessage = "Error 404: The n8n Webhook is not registered or the workflow is not active.\n\n"
-              "Please make sure:\n"
-              "1. You are calling the correct URL.\n"
-              "2. If using the Production URL, the workflow is toggled ACTIVE in n8n.\n"
-              "3. If using the Test URL, you have clicked 'Execute Workflow' in n8n before sending.";
-        } else {
-          errorMessage = "Server error (${e.response!.statusCode}): ${e.response!.statusMessage}";
-        }
+        errorMessage = "Server error (${e.response!.statusCode}): ${e.response!.statusMessage}";
       }
 
       setState(() {
@@ -307,81 +280,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
     }
   }
 
-  void _showSettingsDialog() {
-    final controller = TextEditingController(text: _webhookUrl);
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            'Webhook Settings',
-            style: AppTextStyles.titleSecondary.copyWith(fontSize: 18),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Enter your n8n Webhook URL:',
-                style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: controller,
-                maxLines: 2,
-                style: AppTextStyles.bodyMedium.copyWith(fontSize: 14),
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  hintText: 'https://<host>/webhook/<webhook-id>',
-                  hintStyle: AppTextStyles.hintStyle,
-                  helperText: 'Avoid spaces or newlines at the end.',
-                  helperStyle: AppTextStyles.bodyRegular.copyWith(fontSize: 11),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Current Session ID:\n$_sessionId',
-                style: AppTextStyles.bodyRegular.copyWith(
-                  fontSize: 11,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Cancel',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final cleanedUrl = controller.text.trim();
-                _saveWebhookUrl(cleanedUrl);
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Webhook URL updated successfully!'),
-                    backgroundColor: AppColors.primary,
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // Settings dialog is no longer needed
 
   @override
   Widget build(BuildContext context) {
@@ -396,11 +295,11 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
         title: Row(
           children: [
             const CircleAvatar(
-              radius: 18,
+              radius: 22,
               backgroundImage: AssetImage('assets/images/chatbot.jpg'),
               backgroundColor: Colors.transparent,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -483,11 +382,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
             },
             icon: const Icon(Icons.delete_outline, color: AppColors.textPrimary),
           ),
-          IconButton(
-            tooltip: 'Settings',
-            onPressed: _showSettingsDialog,
-            icon: const Icon(Icons.settings, color: AppColors.textPrimary),
-          ),
+          // Settings button removed
         ],
       ),
       body: Container(
@@ -582,14 +477,39 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Flexible(
-                  child: BubbleSpecialThree(
-                    text: message.text,
-                    color: AppColors.primary,
-                    isSender: true,
-                    tail: true,
-                    textStyle: AppTextStyles.bodyMedium.copyWith(
-                      color: Colors.white,
-                      fontSize: 14,
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(50, 4, 16, 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: const BoxDecoration(
+                      color: AppColors.secondary,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(18),
+                        topRight: Radius.circular(18),
+                        bottomLeft: Radius.circular(18),
+                        bottomRight: Radius.circular(4),
+                      ),
+                    ),
+                    child: MarkdownBody(
+                      data: message.text,
+                      styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                        p: AppTextStyles.bodyMedium.copyWith(color: Colors.white, fontSize: 14),
+                        strong: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                        code: const TextStyle(
+                          backgroundColor: Colors.black26, 
+                          color: Colors.white, 
+                          fontFamily: 'monospace', 
+                          fontSize: 13
+                        ),
+                        h1: AppTextStyles.bodyMedium.copyWith(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                        h2: AppTextStyles.bodyMedium.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        h3: AppTextStyles.bodyMedium.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        listBullet: AppTextStyles.bodyMedium.copyWith(color: Colors.white),
+                        blockquote: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
+                        codeblockDecoration: BoxDecoration(
+                          color: Colors.black26,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -619,20 +539,45 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 const CircleAvatar(
-                  radius: 14,
+                  radius: 20,
                   backgroundImage: AssetImage('assets/images/chatbot.jpg'),
                   backgroundColor: Colors.transparent,
                 ),
                 const SizedBox(width: 8),
                 Flexible(
-                  child: BubbleSpecialThree(
-                    text: message.text,
-                    color: AppColors.secondaryExtraLight,
-                    isSender: false,
-                    tail: true,
-                    textStyle: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textPrimary,
-                      fontSize: 14,
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(0, 4, 50, 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: const BoxDecoration(
+                      color: AppColors.secondaryExtraLight,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(18),
+                        topRight: Radius.circular(18),
+                        bottomLeft: Radius.circular(4),
+                        bottomRight: Radius.circular(18),
+                      ),
+                    ),
+                    child: MarkdownBody(
+                      data: message.text,
+                      styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                        p: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 14),
+                        strong: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        code: const TextStyle(
+                          backgroundColor: Colors.black12, 
+                          color: AppColors.textPrimary, 
+                          fontFamily: 'monospace', 
+                          fontSize: 13
+                        ),
+                        h1: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold),
+                        h2: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+                        h3: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+                        listBullet: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+                        blockquote: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                        codeblockDecoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -756,13 +701,13 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
               child: Container(
                 margin: const EdgeInsets.all(5),
                 padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  gradient: AppColors.brandGradient,
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.arrow_upward_rounded,
-                  color: Colors.white,
+                  color: AppColors.secondary,
                   size: 18,
                 ),
               ),
