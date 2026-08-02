@@ -1,18 +1,18 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../chat/chat_screen.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../chat/chat_screen.dart';
 
-import 'profile_screen.dart';
-import '../../scan/screens/scan_screen.dart';
-import 'recipe_list_screen.dart';
-import 'starred_recipes_screen.dart';
+import 'profile/profile_screen.dart';
+import 'scan/screens/scan_screen.dart';
+import 'recipes/recipe_list_screen.dart';
+import 'recipes/starred_recipes_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
-import '../../auth/services/auth_service.dart';
-import '../../../main.dart';
+import '../auth/services/auth_service.dart';
+import '../../main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 

@@ -12,7 +12,7 @@ import '../widgets/auth_scaffold.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/auth_button.dart';
 import 'signup_screen.dart';
-import '../../home/screens/home_screen.dart';
+import '../../home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
