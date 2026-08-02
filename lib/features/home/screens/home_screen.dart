@@ -339,7 +339,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Safe spacing for the tall AppBar
-            const SizedBox(height: 120),
+            const SizedBox(height: 105),
 
             // Daily Hydration Tracker Card
             Container(
@@ -347,7 +347,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(22),
                 border: Border.all(
                   color: isDark ? Colors.white12 : AppColors.border,
                   width: 1,
@@ -401,7 +401,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   
                   // Progress display
                   Row(
@@ -418,14 +418,14 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                       Text(
                         "${(progress * 100).toInt()}%",
                         style: GoogleFonts.poppins(
-                          color: AppColors.secondary,
+                          color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 9),
                   
                   // Progress bar
                   ClipRRect(
@@ -437,7 +437,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                       minHeight: 8,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 15),
                   
                   // Buttons Row
                   Row(
@@ -445,7 +445,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                       ElevatedButton.icon(
                         onPressed: _addWater,
                         icon: const Icon(Icons.add_rounded, size: 18),
-                        label: const Text("Add 250ml"),
+                        label: const Text("Add 250 ml"),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.secondary,
                           foregroundColor: Colors.white,
