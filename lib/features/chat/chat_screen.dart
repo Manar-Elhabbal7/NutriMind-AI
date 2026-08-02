@@ -207,6 +207,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
     // Call Gemini API
     try {
       final response = await _dio.post(
+        //note i have removed my api key for security reasons
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=YOUR_API_KEY',
         data: {
           'contents': contents,

@@ -663,7 +663,8 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
           "METRICS: Name=FOOD_NAME, Calories=CALORIES_VAL, Carbs=CARBS_VAL, Protein=PROTEIN_VAL, Fats=FATS_VAL "
           "Where FOOD_NAME is the food item name, and CALORIES_VAL, CARBS_VAL, PROTEIN_VAL, FATS_VAL are numeric values like '150 kcal', '20g', '12g', '5g'.";
 
-      final response = await widget.dio.post(
+      final response = await widget.dio.post( 
+        //note i have removed my api key for security reasons
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=YOUR_API_KEY',
         data: {
           'contents': [
