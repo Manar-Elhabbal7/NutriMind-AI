@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/theme/app_colors.dart';
 import 'features/splash/splash_view.dart';
-import 'core/services/notification_service.dart';
+import 'features/home/services/notification_service.dart';
 
 import 'package:flutter/foundation.dart';
 
