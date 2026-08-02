@@ -11,6 +11,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../home/screens/starred_recipes_screen.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -510,8 +511,28 @@ class _ScanScreenState extends State<ScanScreen> {
                       ),
                     ),
 
-                    // Fake switcher space (empty as selfies are prohibited)
-                    const SizedBox(width: 48),
+                    // Favorites button
+                    Tooltip(
+                      message: 'Starred Recipes',
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const StarredRecipesScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.star_rounded, color: Colors.amber, size: 24),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],

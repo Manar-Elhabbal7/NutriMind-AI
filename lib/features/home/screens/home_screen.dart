@@ -7,6 +7,8 @@ import '../../chat/chat_screen.dart';
 
 import 'profile_screen.dart';
 import '../../scan/screens/scan_screen.dart';
+import 'recipe_list_screen.dart';
+import 'starred_recipes_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import '../../auth/services/auth_service.dart';
@@ -117,6 +119,24 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               centerTitle: true,
               actions: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 7.0),
+                  child: IconButton(
+                    tooltip: 'Starred Recipes',
+                    icon: const Icon(
+                      Icons.star_rounded,
+                      color: Colors.amber,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const StarredRecipesScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.only(top: 7.0),
                   child: ValueListenableBuilder<ThemeMode>(
@@ -339,15 +359,15 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Safe spacing for the tall AppBar
-            const SizedBox(height: 105),
+            const SizedBox(height: 88),
 
             // Daily Hydration Tracker Card
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
                   color: isDark ? Colors.white12 : AppColors.border,
                   width: 1,
@@ -355,8 +375,8 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.textPrimary.withValues(alpha: isDark ? 0.01 : 0.04),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
@@ -370,25 +390,25 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Daily Tracker",
+                            "Water Tracker",
                             style: GoogleFonts.poppins(
                               color: Theme.of(context).colorScheme.onSurface,
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 2),
                           Text(
                             "Track your hydration intake",
                             style: GoogleFonts.poppins(
                               color: isDark ? Colors.white54 : AppColors.textSecondary,
-                              fontSize: 12,
+                              fontSize: 11,
                             ),
                           ),
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: AppColors.secondary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
@@ -396,12 +416,12 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                         child: const Icon(
                           Icons.water_drop_rounded,
                           color: AppColors.secondary,
-                          size: 24,
+                          size: 20,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 6),
                   
                   // Progress display
                   Row(
@@ -411,63 +431,63 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                         "${currentIntakeLiters}L / ${targetIntakeLiters}L",
                         style: GoogleFonts.poppins(
                           color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
                         "${(progress * 100).toInt()}%",
                         style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 14,
+                          color: isDark ? Colors.white70 : AppColors.textSecondary,
+                          fontSize: 13,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 9),
+                  const SizedBox(height: 5),
                   
                   // Progress bar
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                     child: LinearProgressIndicator(
                       value: progress,
                       backgroundColor: isDark ? Colors.white12 : AppColors.secondary.withValues(alpha: 0.1),
                       valueColor: const AlwaysStoppedAnimation<Color>(AppColors.secondary),
-                      minHeight: 8,
+                      minHeight: 6,
                     ),
                   ),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 10),
                   
                   // Buttons Row
                   Row(
                     children: [
                       ElevatedButton.icon(
                         onPressed: _addWater,
-                        icon: const Icon(Icons.add_rounded, size: 18),
-                        label: const Text("Add 250 ml"),
+                        icon: const Icon(Icons.add_rounded, size: 16),
+                        label: const Text("Add 250 ml", style: TextStyle(fontSize: 12)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.secondary,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       OutlinedButton(
                         onPressed: _resetWater,
                         style: OutlinedButton.styleFrom(
                           foregroundColor: isDark ? Colors.white70 : AppColors.textSecondary,
                           side: BorderSide(color: isDark ? Colors.white24 : AppColors.border),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         ),
-                        child: const Text("Reset"),
+                        child: const Text("Reset", style: TextStyle(fontSize: 12)),
                       ),
                     ],
                   ),
@@ -475,10 +495,139 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               ),
             ).animate().fade(delay: 150.ms).slideY(begin: 0.1, end: 0, duration: 400.ms),
 
-            const SizedBox(height: 120), // clearance for bottom navigation bar
+            const SizedBox(height: 14),
+            Text(
+              "Recipes Ideas",
+              style: GoogleFonts.poppins(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            GridView.count(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 1.8,
+              children: [
+                _buildCategoryCard("Breakfast", "assets/images/breakfast.jpg", context),
+                _buildCategoryCard("Lunch", "assets/images/launch.jpg", context),
+                _buildCategoryCard("Dinner", "assets/images/dinner.jpg", context),
+                _buildCategoryCard("Smoothies", "assets/images/juice.jpg", context),
+              ],
+            ),
+
+            const SizedBox(height: 96), // clearance for bottom navigation bar
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildCategoryCard(String title, String imagePath, BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecipeListScreen(category: title),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              // Background Image
+              Positioned.fill(
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              // Dark Gradient Overlay for readability
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.7),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // Category Title and Icon
+              Positioned(
+                bottom: 8,
+                left: 10,
+                right: 10,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withValues(alpha: 0.8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _getCategoryIcon(title),
+                        color: Colors.white,
+                        size: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ).animate().scale(delay: 200.ms, duration: 300.ms),
+    );
+  }
+
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case "Breakfast":
+        return Icons.wb_sunny_rounded;
+      case "Lunch":
+        return Icons.lunch_dining_rounded;
+      case "Dinner":
+        return Icons.dinner_dining_rounded;
+      case "Smoothies":
+        return Icons.local_drink_rounded;
+      default:
+        return Icons.restaurant_menu_rounded;
+    }
   }
 }
