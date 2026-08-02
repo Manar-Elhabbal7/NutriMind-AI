@@ -681,9 +681,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         duration: const Duration(
                                           milliseconds: 250,
                                         ),
-                                         padding: const EdgeInsets.symmetric(
-                                           vertical: 6,
-                                         ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 6,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: _gender == 'Male'
                                               ? AppColors.secondaryExtraLight
@@ -966,42 +966,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     // Notification Preferences Card
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: isDark ? Colors.white12 : AppColors.border,
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.textPrimary.withValues(
-                              alpha: isDark ? 0.01 : 0.04,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF1E1E1E)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: isDark ? Colors.white12 : AppColors.border,
+                              width: 1,
                             ),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.textPrimary.withValues(
+                                  alpha: isDark ? 0.01 : 0.04,
+                                ),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Preferences',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                          Divider(
-                            height: 8,
-                            color: isDark ? Colors.white12 : AppColors.divider,
-                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Preferences',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
+                              ),
+                              Divider(
+                                height: 8,
+                                color: isDark
+                                    ? Colors.white12
+                                    : AppColors.divider,
+                              ),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -1093,11 +1099,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 child: SizedBox(
                                   height: 44,
                                   child: OutlinedButton.icon(
-                                    label: Text('Save Changes', style: AppTextStyles.bodyMedium.copyWith(
+                                    label: Text(
+                                      'Save Changes',
+                                      style: AppTextStyles.bodyMedium.copyWith(
                                         color: AppColors.secondary,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
-                                      ),),
+                                      ),
+                                    ),
                                     onPressed: _saveProfileData,
                                     icon: const Icon(
                                       Icons.save_rounded,

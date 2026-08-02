@@ -29,8 +29,6 @@ class _ScanScreenState extends State<ScanScreen> {
   final Dio _dio = Dio();
   XFile? _previewPhoto;
 
-
-
   // Flash mode
   FlashMode _flashMode = FlashMode.off;
 
@@ -100,8 +98,6 @@ class _ScanScreenState extends State<ScanScreen> {
     _controller?.dispose();
     super.dispose();
   }
-
-
 
   Future<void> _toggleFlash() async {
     if (_controller == null || !_isCameraReady) return;
@@ -367,7 +363,10 @@ class _ScanScreenState extends State<ScanScreen> {
                                   color: AppColors.secondary,
                                   width: 4,
                                 ),
-                                top: BorderSide(color: AppColors.secondary, width: 4),
+                                top: BorderSide(
+                                  color: AppColors.secondary,
+                                  width: 4,
+                                ),
                               ),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(8),
@@ -387,7 +386,10 @@ class _ScanScreenState extends State<ScanScreen> {
                                   color: AppColors.secondary,
                                   width: 4,
                                 ),
-                                top: BorderSide(color: AppColors.secondary, width: 4),
+                                top: BorderSide(
+                                  color: AppColors.secondary,
+                                  width: 4,
+                                ),
                               ),
                               borderRadius: BorderRadius.only(
                                 topRight: Radius.circular(8),
@@ -452,35 +454,39 @@ class _ScanScreenState extends State<ScanScreen> {
                     width: size.width * 0.85,
                     height: size.width * 0.85,
                     alignment: Alignment.topCenter,
-                    child: Container(
-                      width: size.width * 0.81,
-                      height: 3,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.secondary.withValues(alpha: 0.1),
-                            AppColors.secondary,
-                            AppColors.secondary.withValues(alpha: 0.1),
-                          ],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.secondary.withValues(alpha: 0.5),
-                            blurRadius: 8,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                    )
-                    .animate(
-                      onPlay: (controller) => controller.repeat(reverse: true),
-                    )
-                    .slideY(
-                      begin: 0.0,
-                      end: (size.width * 0.85) / 3.0,
-                      duration: 2500.ms,
-                      curve: Curves.easeInOut,
-                    ),
+                    child:
+                        Container(
+                              width: size.width * 0.81,
+                              height: 3,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppColors.secondary.withValues(alpha: 0.1),
+                                    AppColors.secondary,
+                                    AppColors.secondary.withValues(alpha: 0.1),
+                                  ],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.secondary.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                            )
+                            .animate(
+                              onPlay: (controller) =>
+                                  controller.repeat(reverse: true),
+                            )
+                            .slideY(
+                              begin: 0.0,
+                              end: (size.width * 0.85) / 3.0,
+                              duration: 2500.ms,
+                              curve: Curves.easeInOut,
+                            ),
                   ),
                 ),
               ],
@@ -568,9 +574,7 @@ class _ScanScreenState extends State<ScanScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.secondary,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 16,
-                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -663,7 +667,7 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
           "METRICS: Name=FOOD_NAME, Calories=CALORIES_VAL, Carbs=CARBS_VAL, Protein=PROTEIN_VAL, Fats=FATS_VAL "
           "Where FOOD_NAME is the food item name, and CALORIES_VAL, CARBS_VAL, PROTEIN_VAL, FATS_VAL are numeric values like '150 kcal', '20g', '12g', '5g'.";
 
-      final response = await widget.dio.post( 
+      final response = await widget.dio.post(
         //note i have removed my api key for security reasons
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=YOUR_API_KEY',
         data: {

@@ -904,7 +904,6 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     );
   }
 
-
   //increase the card height
   Widget _buildCategoryCard(
     String title,
