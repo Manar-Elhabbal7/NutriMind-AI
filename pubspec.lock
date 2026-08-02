@@ -672,14 +672,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-  nutrition_ai:
-    dependency: "direct main"
-    description:
-      name: nutrition_ai
-      sha256: "466ee182e6d68a62b0e3141572b7729c820cb3f7ea1453cc8bd131d07a5018a6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.3.0"
   objective_c:
     dependency: transitive
     description:

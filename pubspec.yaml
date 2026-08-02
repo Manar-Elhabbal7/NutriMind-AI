@@ -14,7 +14,6 @@ dependencies:
   flutter_animate: ^4.5.2
   google_fonts: ^8.2.0
   google_sign_in: ^6.3.0
-  nutrition_ai: ^3.3.0
   flutter_launcher_icons: ^0.14.4
   firebase_core: ^4.12.1
   firebase_auth: ^6.5.6
