@@ -187,8 +187,9 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                                   fit: BoxFit.cover,
                                   loadingBuilder:
                                       (context, child, loadingProgress) {
-                                        if (loadingProgress == null)
+                                        if (loadingProgress == null) {
                                           return child;
+                                        }
                                         return Container(
                                           color: isDark
                                               ? Colors.white12

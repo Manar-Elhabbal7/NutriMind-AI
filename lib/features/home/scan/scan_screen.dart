@@ -9,9 +9,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../recipes/starred_recipes_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../recipes/starred_recipes_screen.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -29,10 +29,7 @@ class _ScanScreenState extends State<ScanScreen> {
   final Dio _dio = Dio();
   XFile? _previewPhoto;
 
-  // Focus properties
-  Offset? _tapPosition;
-  bool _showFocusSquare = false;
-  Timer? _focusTimer;
+
 
   // Flash mode
   FlashMode _flashMode = FlashMode.off;
@@ -100,42 +97,11 @@ class _ScanScreenState extends State<ScanScreen> {
 
   @override
   void dispose() {
-    _focusTimer?.cancel();
     _controller?.dispose();
     super.dispose();
   }
 
-  Future<void> _handleFocus(TapUpDetails details) async {
-    if (_controller == null || !_controller!.value.isInitialized) return;
 
-    // Calculate focal point
-    final double x =
-        details.localPosition.dx / MediaQuery.of(context).size.width;
-    final double y =
-        details.localPosition.dy / MediaQuery.of(context).size.height;
-    final Offset focusPoint = Offset(x, y);
-
-    try {
-      await _controller!.setFocusPoint(focusPoint);
-      await _controller!.setExposurePoint(focusPoint);
-
-      setState(() {
-        _tapPosition = details.localPosition;
-        _showFocusSquare = true;
-      });
-
-      _focusTimer?.cancel();
-      _focusTimer = Timer(const Duration(seconds: 1), () {
-        if (mounted) {
-          setState(() {
-            _showFocusSquare = false;
-          });
-        }
-      });
-    } catch (e) {
-      // Focus settings might fail on emulator/hardware differences
-    }
-  }
 
   Future<void> _toggleFlash() async {
     if (_controller == null || !_isCameraReady) return;
@@ -356,163 +322,168 @@ class _ScanScreenState extends State<ScanScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Live Camera Preview
+          // Live Camera Preview & Overlays wrapped in GestureDetector for tap-to-capture
           GestureDetector(
-            onTapUp: _handleFocus,
-            child: Center(
-              child: Transform.scale(
-                scale: 1.0,
-                child: AspectRatio(
-                  aspectRatio: _controller!.value.aspectRatio,
-                  child: CameraPreview(_controller!),
+            onTap: _captureAndAnalyze,
+            behavior: HitTestBehavior.opaque,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Live Camera Preview
+                Center(
+                  child: Transform.scale(
+                    scale: 1.0,
+                    child: AspectRatio(
+                      aspectRatio: _controller!.value.aspectRatio,
+                      child: CameraPreview(_controller!),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
 
-          // Scanner Target Frame Overlay
-          Center(
-            child: Container(
-              width: size.width * 0.72,
-              height: size.width * 0.72,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  width: 2,
-                ),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Stack(
-                children: [
-                  // Corner brackets for professional feel
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: AppColors.secondary,
-                            width: 4,
-                          ),
-                          top: BorderSide(color: AppColors.secondary, width: 4),
-                        ),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                        ),
+                // Scanner Target Frame Overlay
+                Center(
+                  child: Container(
+                    width: size.width * 0.85,
+                    height: size.width * 0.85,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        width: 2,
                       ),
+                      borderRadius: BorderRadius.circular(24),
                     ),
-                  ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          right: BorderSide(
-                            color: AppColors.secondary,
-                            width: 4,
-                          ),
-                          top: BorderSide(color: AppColors.secondary, width: 4),
-                        ),
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 0,
-                    bottom: 0,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: AppColors.secondary,
-                            width: 4,
-                          ),
-                          bottom: BorderSide(
-                            color: AppColors.secondary,
-                            width: 4,
-                          ),
-                        ),
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          right: BorderSide(
-                            color: AppColors.secondary,
-                            width: 4,
-                          ),
-                          bottom: BorderSide(
-                            color: AppColors.secondary,
-                            width: 4,
-                          ),
-                        ),
-                        borderRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ).animate().fadeIn(duration: 400.ms),
-
-          // Animated Scanning Line Overlay
-          Center(
-            child: Container(
-              width: size.width * 0.72,
-              height: size.width * 0.72,
-              alignment: Alignment.topCenter,
-              child:
-                  Container(
-                        width: size.width * 0.68,
-                        height: 3,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.secondary.withValues(alpha: 0.1),
-                              AppColors.secondary,
-                              AppColors.secondary.withValues(alpha: 0.1),
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.secondary.withValues(alpha: 0.5),
-                              blurRadius: 8,
-                              spreadRadius: 2,
+                    child: Stack(
+                      children: [
+                        // Corner brackets for professional feel
+                        Positioned(
+                          left: 0,
+                          top: 0,
+                          child: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                left: BorderSide(
+                                  color: AppColors.secondary,
+                                  width: 4,
+                                ),
+                                top: BorderSide(color: AppColors.secondary, width: 4),
+                              ),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(8),
+                              ),
                             ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                right: BorderSide(
+                                  color: AppColors.secondary,
+                                  width: 4,
+                                ),
+                                top: BorderSide(color: AppColors.secondary, width: 4),
+                              ),
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          left: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                left: BorderSide(
+                                  color: AppColors.secondary,
+                                  width: 4,
+                                ),
+                                bottom: BorderSide(
+                                  color: AppColors.secondary,
+                                  width: 4,
+                                ),
+                              ),
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                right: BorderSide(
+                                  color: AppColors.secondary,
+                                  width: 4,
+                                ),
+                                bottom: BorderSide(
+                                  color: AppColors.secondary,
+                                  width: 4,
+                                ),
+                              ),
+                              borderRadius: BorderRadius.only(
+                                bottomRight: Radius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ).animate().fadeIn(duration: 400.ms),
+
+                // Animated Scanning Line Overlay
+                Center(
+                  child: Container(
+                    width: size.width * 0.85,
+                    height: size.width * 0.85,
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      width: size.width * 0.81,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.secondary.withValues(alpha: 0.1),
+                            AppColors.secondary,
+                            AppColors.secondary.withValues(alpha: 0.1),
                           ],
                         ),
-                      )
-                      .animate(
-                        onPlay: (controller) =>
-                            controller.repeat(reverse: true),
-                      )
-                      .slideY(
-                        begin: 0.05,
-                        end: 12.0,
-                        duration: 2500.ms,
-                        curve: Curves.easeInOut,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.secondary.withValues(alpha: 0.5),
+                            blurRadius: 8,
+                            spreadRadius: 2,
+                          ),
+                        ],
                       ),
+                    )
+                    .animate(
+                      onPlay: (controller) => controller.repeat(reverse: true),
+                    )
+                    .slideY(
+                      begin: 0.0,
+                      end: (size.width * 0.85) / 3.0,
+                      duration: 2500.ms,
+                      curve: Curves.easeInOut,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -560,42 +531,16 @@ class _ScanScreenState extends State<ScanScreen> {
             ),
           ),
 
-          // Focus indicator visual square
-          if (_showFocusSquare && _tapPosition != null)
-            Positioned(
-              left: _tapPosition!.dx - 28,
-              top: _tapPosition!.dy - 28,
-              child:
-                  Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: AppColors.secondary,
-                            width: 2,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      )
-                      .animate()
-                      .scale(
-                        begin: const Offset(1.4, 1.4),
-                        end: const Offset(1.0, 1.0),
-                        duration: 200.ms,
-                      )
-                      .fadeOut(delay: 800.ms, duration: 200.ms),
-            ),
-
           // Bottom Controller Bar
           Positioned(
-            bottom: MediaQuery.of(context).padding.bottom + 24,
-            left: 0,
-            right: 0,
+            bottom: MediaQuery.of(context).padding.bottom + 120,
+            left: 24,
+            right: 24,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Place the food inside the box to scan",
+                  "Tap the screen to scan, or upload an image",
                   style: AppTextStyles.bodyRegular.copyWith(
                     color: Colors.white.withValues(alpha: 0.8),
                     fontSize: 13,
@@ -603,52 +548,37 @@ class _ScanScreenState extends State<ScanScreen> {
                 ),
                 const SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Gallery selector button
-                    GestureDetector(
-                      onTap: _pickFromGallery,
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _pickFromGallery,
+                        icon: const Icon(
                           Icons.photo_library_rounded,
                           color: Colors.white,
-                          size: 24,
+                          size: 18,
+                        ),
+                        label: const Text(
+                          "Upload Image",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.secondary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 4,
                         ),
                       ),
                     ),
-
-                    // Trigger/Capture Button
-                    GestureDetector(
-                      onTap: _captureAndAnalyze,
-                      child: Container(
-                        height: 76,
-                        width: 76,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.secondary,
-                            width: 4,
-                          ),
-                        ),
-                        child: Center(
-                          child: Container(
-                            height: 60,
-                            width: 60,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
+                    const SizedBox(width: 16),
                     // Favorites button
                     Tooltip(
                       message: 'Starred Recipes',
@@ -663,7 +593,7 @@ class _ScanScreenState extends State<ScanScreen> {
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
@@ -734,7 +664,7 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
           "Where FOOD_NAME is the food item name, and CALORIES_VAL, CARBS_VAL, PROTEIN_VAL, FATS_VAL are numeric values like '150 kcal', '20g', '12g', '5g'.";
 
       final response = await widget.dio.post(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=AQ.Ab8RN6LAcwx88KBQQADRB5SXHojNRdbGvYMWNZn7MCgIjtSYaQ',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=YOUR_API_KEY',
         data: {
           'contents': [
             {

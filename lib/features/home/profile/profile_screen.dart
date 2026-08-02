@@ -344,130 +344,137 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             // 1. Header: Banner & Profile Image
-            Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: [
-                // Banner Image
-                GestureDetector(
-                  onTap: _pickBannerPhoto,
-                  child: Container(
-                    height: 180,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryExtraLight,
-                      image: DecorationImage(
-                        image: _buildImageProvider(_bannerPhotoPath, false),
-                        fit: BoxFit.cover,
+            SizedBox(
+              height: 185,
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  // Banner Image
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 150,
+                    child: GestureDetector(
+                      onTap: _pickBannerPhoto,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryExtraLight,
+                          image: DecorationImage(
+                            image: _buildImageProvider(_bannerPhotoPath, false),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        child: Stack(
+                          children: [
+                            // Overlay gradient for aesthetics
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.black.withValues(alpha: 0.3),
+                                    Colors.transparent,
+                                    Colors.black.withValues(alpha: 0.1),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // Edit banner button
+                            Positioned(
+                              top: 30,
+                              right: 16,
+                              child: InkWell(
+                                onTap: _pickBannerPhoto,
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.5),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white30),
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt_rounded,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    child: Stack(
-                      children: [
-                        // Overlay gradient for aesthetics
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.black.withValues(alpha: 0.3),
-                                Colors.transparent,
-                                Colors.black.withValues(alpha: 0.1),
-                              ],
-                            ),
-                          ),
-                        ),
-                        // Edit banner button
-                        Positioned(
-                          top: 50,
-                          right: 16,
-                          child: InkWell(
-                            onTap: _pickBannerPhoto,
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white30),
-                              ),
-                              child: const Icon(
-                                Icons.camera_alt_rounded,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
-                ),
 
-                // Profile image overlapping the banner
-                Positioned(
-                  bottom: -72,
-                  child: GestureDetector(
-                    onTap: _pickProfilePhoto,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Outer white circular border containing full profile photo
-                        Container(
-                          width: 145,
-                          height: 145,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 4),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 10,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                            image: DecorationImage(
-                              image: _buildImageProvider(
-                                _profilePhotoPath,
-                                true,
-                              ),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        // Camera Badge
-                        Positioned(
-                          bottom: 4,
-                          right: 4,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: AppColors.secondary,
+                  // Profile image overlapping the banner
+                  Positioned(
+                    top: 75,
+                    child: GestureDetector(
+                      onTap: _pickProfilePhoto,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Outer white circular border containing full profile photo
+                          Container(
+                            width: 110,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
                               shape: BoxShape.circle,
-                              boxShadow: [
+                              border: Border.all(color: Colors.white, width: 3),
+                              boxShadow: const [
                                 BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 2),
+                                  color: Colors.black12,
+                                  blurRadius: 10,
+                                  offset: Offset(0, 4),
                                 ),
                               ],
-                            ),
-                            child: const Icon(
-                              Icons.edit_rounded,
-                              color: Colors.white,
-                              size: 14,
+                              image: DecorationImage(
+                                image: _buildImageProvider(
+                                  _profilePhotoPath,
+                                  true,
+                                ),
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                          // Camera Badge
+                          Positioned(
+                            bottom: 2,
+                            right: 2,
+                            child: Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: const BoxDecoration(
+                                color: AppColors.secondary,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.edit_rounded,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
 
-            const SizedBox(height: 80),
+            const SizedBox(height: 2),
 
             // Form Content
             Padding(
@@ -480,7 +487,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     TextFormField(
                       controller: _nameController,
                       style: AppTextStyles.titleSecondary.copyWith(
-                        fontSize: 22,
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
@@ -488,7 +495,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       decoration: InputDecoration(
                         hintText: 'Enter your name',
                         hintStyle: AppTextStyles.hintStyle.copyWith(
-                          fontSize: 18,
+                          fontSize: 16,
                           color: isDark
                               ? Colors.white30
                               : AppColors.textSecondary.withValues(alpha: 0.5),
@@ -502,7 +509,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 24,
-                          vertical: 8,
+                          vertical: 2,
                         ),
                       ),
                       validator: (value) {
@@ -517,7 +524,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       duration: 300.ms,
                     ),
 
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 0),
 
                     // Email (Read-only)
                     Text(
@@ -526,7 +533,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: isDark
                             ? Colors.white54
                             : AppColors.textSecondary,
-                        fontSize: 14,
+                        fontSize: 13,
                       ),
                     ).animate().fade().slideY(
                       begin: 0.1,
@@ -535,13 +542,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       duration: 300.ms,
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
 
                     // 2. Physical Metrics Card
                     Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 16,
+                            horizontal: 16,
+                            vertical: 10,
                           ),
                           decoration: BoxDecoration(
                             color: isDark
@@ -568,7 +575,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Text(
                                 'Physical Profile',
                                 style: AppTextStyles.bodyMedium.copyWith(
-                                  fontSize: 16,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                   color: Theme.of(
                                     context,
@@ -576,7 +583,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                               Divider(
-                                height: 20,
+                                height: 8,
                                 color: isDark
                                     ? Colors.white12
                                     : AppColors.divider,
@@ -586,14 +593,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Text(
                                 'Gender',
                                 style: AppTextStyles.bodyMedium.copyWith(
-                                  fontSize: 13,
+                                  fontSize: 12,
                                   color: isDark
                                       ? Colors.white54
                                       : AppColors.textSecondary,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 4),
                               Row(
                                 children: [
                                   // Female Option
@@ -606,7 +613,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           milliseconds: 250,
                                         ),
                                         padding: const EdgeInsets.symmetric(
-                                          vertical: 10,
+                                          vertical: 6,
                                         ),
                                         decoration: BoxDecoration(
                                           color: _gender == 'Female'
@@ -675,9 +682,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         duration: const Duration(
                                           milliseconds: 250,
                                         ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 10,
-                                        ),
+                                         padding: const EdgeInsets.symmetric(
+                                           vertical: 6,
+                                         ),
                                         decoration: BoxDecoration(
                                           color: _gender == 'Male'
                                               ? AppColors.secondaryExtraLight
@@ -738,7 +745,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ],
                               ),
 
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 6),
 
                               // Height & Weight Side-by-Side Row
                               Row(
@@ -754,14 +761,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           'Height',
                                           style: AppTextStyles.bodyMedium
                                               .copyWith(
-                                                fontSize: 13,
+                                                fontSize: 12,
                                                 color: isDark
                                                     ? Colors.white54
                                                     : AppColors.textSecondary,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                         ),
-                                        const SizedBox(height: 6),
+                                        const SizedBox(height: 4),
                                         TextFormField(
                                           controller: _heightController,
                                           keyboardType:
@@ -856,14 +863,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           'Weight',
                                           style: AppTextStyles.bodyMedium
                                               .copyWith(
-                                                fontSize: 13,
+                                                fontSize: 12,
                                                 color: isDark
                                                     ? Colors.white54
                                                     : AppColors.textSecondary,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                         ),
-                                        const SizedBox(height: 6),
+                                        const SizedBox(height: 4),
                                         TextFormField(
                                           controller: _weightController,
                                           keyboardType:
@@ -956,52 +963,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         .fade(delay: 150.ms)
                         .slideY(begin: 0.08, end: 0, duration: 400.ms),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 8),
 
                     // Notification Preferences Card
                     Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF1E1E1E)
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: isDark ? Colors.white12 : AppColors.border,
-                              width: 1,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: isDark ? Colors.white12 : AppColors.border,
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.textPrimary.withValues(
+                              alpha: isDark ? 0.01 : 0.04,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.textPrimary.withValues(
-                                  alpha: isDark ? 0.01 : 0.04,
-                                ),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Preferences',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface,
-                                ),
-                              ),
-                              Divider(
-                                height: 20,
-                                color: isDark
-                                    ? Colors.white12
-                                    : AppColors.divider,
-                              ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Preferences',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          Divider(
+                            height: 8,
+                            color: isDark ? Colors.white12 : AppColors.divider,
+                          ),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -1075,7 +1076,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         .fade(delay: 200.ms)
                         .slideY(begin: 0.08, end: 0, duration: 400.ms),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
                     // 3. Action Buttons Row
                     if (_isSaving)
@@ -1091,20 +1092,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             children: [
                               Expanded(
                                 child: SizedBox(
-                                  height: 50,
-                                  child: AppButton(
-                                    text: 'Save Changes',
+                                  height: 44,
+                                  child: OutlinedButton.icon(
+                                    label: Text('Save Changes', style: AppTextStyles.bodyMedium.copyWith(
+                                        color: AppColors.secondary,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),),
                                     onPressed: _saveProfileData,
-                                    backgroundColor: AppColors.secondary,
-                                    borderRadius: 14,
-                                    height: 50,
+                                    icon: const Icon(
+                                      Icons.save_rounded,
+                                      color: AppColors.secondary,
+                                      size: 16,
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(
+                                        color: AppColors.secondary,
+                                        width: 1.5,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: SizedBox(
-                                  height: 50,
+                                  height: 44,
                                   child: OutlinedButton.icon(
                                     onPressed: _handleSignOut,
                                     icon: const Icon(
@@ -1143,7 +1159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
 
                     // Padding for bottom nav bar overlay
-                    const SizedBox(height: 120),
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),

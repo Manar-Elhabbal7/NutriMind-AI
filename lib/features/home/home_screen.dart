@@ -6,7 +6,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../chat/chat_screen.dart';
 
 import 'profile/profile_screen.dart';
-import 'scan/screens/scan_screen.dart';
+import 'scan/scan_screen.dart';
 import 'recipes/recipe_list_screen.dart';
 import 'recipes/starred_recipes_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -33,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _scanKey = GlobalKey();
   final GlobalKey _profileKey = GlobalKey();
   final GlobalKey _chatKey = GlobalKey();
+  final GlobalKey _starKey = GlobalKey();
+  final GlobalKey _recipesKey = GlobalKey();
 
   int? _tutorialStep;
   OverlayEntry? _tutorialOverlayEntry;
@@ -83,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _nextTutorialStep() {
     if (_tutorialStep == null) return;
     setState(() {
-      if (_tutorialStep! < 4) {
+      if (_tutorialStep! < 6) {
         _tutorialStep = _tutorialStep! + 1;
         if (_currentIndex != 0) {
           _currentIndex = 0;
@@ -141,16 +143,26 @@ class _HomeScreenState extends State<HomeScreen> {
       description =
           'Track your daily water intake. Log every cup you drink to reach your daily goal.';
     } else if (_tutorialStep == 2) {
+      targetRRect = _getWidgetRRect(_recipesKey, padding: 6, radius: 18);
+      title = 'Curated Recipe Ideas 🍳';
+      description =
+          'Explore healthy recipes categorized by breakfast, lunch, dinner, or smoothies, tailored to your lifestyle.';
+    } else if (_tutorialStep == 3) {
+      targetRRect = _getWidgetRRect(_starKey, padding: 4, radius: 12);
+      title = 'Starred Recipes 🌟';
+      description =
+          'Quickly view and access all the recipes you have saved as your favorites.';
+    } else if (_tutorialStep == 4) {
       targetRRect = _getWidgetRRect(_chatKey, padding: 4, radius: 30);
       title = 'AI Nutritionist Support 💬';
       description =
           'Have questions about recipes or your diet? Chat with our AI nutritionist assistant anytime.';
-    } else if (_tutorialStep == 3) {
+    } else if (_tutorialStep == 5) {
       targetRRect = _getWidgetRRect(_scanKey, padding: 6, radius: 16);
       title = 'Food & Product Scanner 🔍';
       description =
           'Scan food labels or barcodes to analyze their nutritional value instantly.';
-    } else if (_tutorialStep == 4) {
+    } else if (_tutorialStep == 6) {
       targetRRect = _getWidgetRRect(_profileKey, padding: 6, radius: 16);
       title = 'Profile & Preferences 👤';
       description =
@@ -235,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Progress indicator dots
               Row(
-                children: List.generate(5, (index) {
+                children: List.generate(7, (index) {
                   return Container(
                     margin: const EdgeInsets.only(right: 6),
                     width: _tutorialStep == index ? 16 : 6,
@@ -286,17 +298,11 @@ class _HomeScreenState extends State<HomeScreen> {
     double left = 20;
     double right = 20;
 
-    if (_tutorialStep == 1) {
+    if (_tutorialStep == 1 || _tutorialStep == 3) {
       if (targetRRect != null) {
         top = targetRRect.bottom + 12;
       } else {
         top = 360;
-      }
-    } else if (_tutorialStep == 2) {
-      if (targetRRect != null) {
-        bottom = MediaQuery.of(context).size.height - targetRRect.top + 12;
-      } else {
-        bottom = 180;
       }
     } else {
       if (targetRRect != null) {
@@ -363,39 +369,44 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<Widget> get _pages => [
-    HomeScreenContent(waterTrackerKey: _waterTrackerKey),
+    HomeScreenContent(
+      waterTrackerKey: _waterTrackerKey,
+      recipesKey: _recipesKey,
+    ),
     const ScanScreen(),
     const ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
+      backgroundColor: isDark ? null : Colors.white,
       extendBodyBehindAppBar: true,
       appBar: (_currentIndex == 1 || _currentIndex == 2)
           ? null
           : AppBar(
-              toolbarHeight: 96,
-              leadingWidth: 76,
+              toolbarHeight: 110,
+              leadingWidth: 88,
               leading: Padding(
-                padding: const EdgeInsets.only(left: 16.0, top: 7.0),
+                padding: const EdgeInsets.only(left: 16.0, top: 12.0),
                 child: Center(
                   child: CircleAvatar(
-                    radius: 28,
+                    radius: 32,
                     backgroundImage: _buildImageProvider(_profilePhotoPath),
                     backgroundColor: Colors.transparent,
                   ),
                 ),
               ),
               title: Padding(
-                padding: const EdgeInsets.only(top: 7.0),
+                padding: const EdgeInsets.only(top: 12.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'Hello, $_displayName',
                       style: AppTextStyles.titleSecondary.copyWith(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
@@ -404,7 +415,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       _getCurrentDateString(),
                       style: AppTextStyles.bodyRegular.copyWith(
-                        fontSize: 12,
+                        fontSize: 13,
                         color: Theme.of(
                           context,
                         ).colorScheme.onSurface.withValues(alpha: 0.6),
@@ -416,8 +427,10 @@ class _HomeScreenState extends State<HomeScreen> {
               centerTitle: true,
               actions: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 7.0),
+                  padding: const EdgeInsets.only(top: 12.0),
                   child: IconButton(
+                    key: _starKey,
+                    iconSize: 30,
                     tooltip: 'Starred Recipes',
                     icon: const Icon(Icons.star_rounded, color: Colors.amber),
                     onPressed: () {
@@ -431,11 +444,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 7.0),
+                  padding: const EdgeInsets.only(top: 12.0),
                   child: ValueListenableBuilder<ThemeMode>(
                     valueListenable: MyApp.themeNotifier,
                     builder: (context, currentMode, _) {
                       return IconButton(
+                        iconSize: 30,
                         icon: Icon(
                           currentMode == ThemeMode.dark
                               ? Icons.light_mode_rounded
@@ -598,7 +612,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class HomeScreenContent extends StatefulWidget {
   final GlobalKey waterTrackerKey;
-  const HomeScreenContent({super.key, required this.waterTrackerKey});
+  final GlobalKey recipesKey;
+  const HomeScreenContent({
+    super.key,
+    required this.waterTrackerKey,
+    required this.recipesKey,
+  });
 
   @override
   State<HomeScreenContent> createState() => _HomeScreenContentState();
@@ -647,24 +666,24 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     final progress = _waterCups / _targetCups;
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: isDark
-            ? const LinearGradient(
+      color: isDark ? null : Colors.white,
+      decoration: isDark
+          ? const BoxDecoration(
+              gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [Color(0xFF121212), Color(0xFF1E1E1E)],
-              )
-            : AppColors.authBackgroundGradient,
-      ),
+              ),
+            )
+          : null,
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Safe spacing for the tall AppBar
-            const SizedBox(height: 88),
+            const SizedBox(height: 165),
 
-            // Daily Hydration Tracker Card
             Container(
                   key: widget.waterTrackerKey,
                   width: double.infinity,
@@ -674,7 +693,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                   ),
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(25),
                     border: Border.all(
                       color: isDark ? Colors.white12 : AppColors.border,
                       width: 1,
@@ -708,7 +727,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 6),
                               Text(
                                 "Track your hydration intake",
                                 style: GoogleFonts.poppins(
@@ -760,7 +779,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 7),
 
                       // Progress bar
                       ClipRRect(
@@ -776,7 +795,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                           minHeight: 6,
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 15),
 
                       // Buttons Row
                       Row(
@@ -801,7 +820,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 10),
                           OutlinedButton(
                             onPressed: _resetWater,
                             style: OutlinedButton.styleFrom(
@@ -835,8 +854,9 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                 .fade(delay: 150.ms)
                 .slideY(begin: 0.1, end: 0, duration: 400.ms),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 20),
             Text(
+              key: widget.recipesKey,
               "Recipes Ideas",
               style: GoogleFonts.poppins(
                 color: Theme.of(context).colorScheme.onSurface,
@@ -844,7 +864,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 15),
             GridView.count(
               shrinkWrap: true,
               padding: EdgeInsets.zero,
@@ -852,7 +872,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               crossAxisCount: 2,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              childAspectRatio: 1.8,
+              childAspectRatio: 1.4,
               children: [
                 _buildCategoryCard(
                   "Breakfast",
@@ -884,6 +904,8 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     );
   }
 
+
+  //increase the card height
   Widget _buildCategoryCard(
     String title,
     String imagePath,
