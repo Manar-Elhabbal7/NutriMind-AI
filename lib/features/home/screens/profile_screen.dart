@@ -296,8 +296,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -432,16 +434,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     // Display Name Input
-                    TextFormField(
+                     TextFormField(
                       controller: _nameController,
                       style: AppTextStyles.titleSecondary.copyWith(
                         fontSize: 22,
                         fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
                         hintText: 'Enter your name',
-                        hintStyle: AppTextStyles.hintStyle.copyWith(fontSize: 18),
+                        hintStyle: AppTextStyles.hintStyle.copyWith(
+                          fontSize: 18,
+                          color: isDark ? Colors.white30 : AppColors.textSecondary.withValues(alpha: 0.5),
+                        ),
                         border: InputBorder.none,
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: AppColors.secondary.withValues(alpha: 0.5), width: 1.5),
@@ -462,7 +468,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Text(
                       _email.isNotEmpty ? _email : 'no-email@nutrimind.com',
                       style: AppTextStyles.bodyRegular.copyWith(
-                        color: AppColors.textSecondary,
+                        color: isDark ? Colors.white54 : AppColors.textSecondary,
                         fontSize: 14,
                       ),
                     ).animate().fade().slideY(begin: 0.1, end: 0, delay: 50.ms, duration: 300.ms),
@@ -473,12 +479,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: AppColors.border, width: 1),
+                        border: Border.all(
+                          color: isDark ? Colors.white12 : AppColors.border,
+                          width: 1,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.textPrimary.withValues(alpha: 0.04),
+                            color: AppColors.textPrimary.withValues(alpha: isDark ? 0.01 : 0.04),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
@@ -492,17 +501,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             style: AppTextStyles.bodyMedium.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
-                          const Divider(height: 20, color: AppColors.divider),
+                          Divider(
+                            height: 20,
+                            color: isDark ? Colors.white12 : AppColors.divider,
+                          ),
 
                           // Gender Selection Box
                           Text(
                             'Gender',
                             style: AppTextStyles.bodyMedium.copyWith(
                               fontSize: 13,
-                              color: AppColors.textSecondary,
+                              color: isDark ? Colors.white54 : AppColors.textSecondary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -518,8 +530,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     padding: const EdgeInsets.symmetric(vertical: 10),
                                     decoration: BoxDecoration(
                                       color: _gender == 'Female'
-                                          ? AppColors.primaryExtraLight
-                                          : AppColors.fill,
+                                          ? AppColors.primaryExtraLight.withValues(alpha: isDark ? 0.25 : 1.0)
+                                          : (isDark ? const Color(0xFF2C2C2C) : AppColors.fill),
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
                                         color: _gender == 'Female'
@@ -534,7 +546,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           Icons.female_rounded,
                                           color: _gender == 'Female'
                                               ? AppColors.secondary
-                                              : AppColors.textSecondary,
+                                              : (isDark ? Colors.white54 : AppColors.textSecondary),
                                           size: 24,
                                         ),
                                         const SizedBox(height: 2),
@@ -543,7 +555,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           style: AppTextStyles.bodyMedium.copyWith(
                                             color: _gender == 'Female'
                                                 ? AppColors.secondary
-                                                : AppColors.textSecondary,
+                                                : (isDark ? Colors.white54 : AppColors.textSecondary),
                                             fontWeight: _gender == 'Female'
                                                 ? FontWeight.bold
                                                 : FontWeight.w500,
@@ -565,8 +577,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     padding: const EdgeInsets.symmetric(vertical: 10),
                                     decoration: BoxDecoration(
                                       color: _gender == 'Male'
-                                          ? AppColors.secondaryExtraLight
-                                          : AppColors.fill,
+                                          ? AppColors.secondaryExtraLight.withValues(alpha: isDark ? 0.25 : 1.0)
+                                          : (isDark ? const Color(0xFF2C2C2C) : AppColors.fill),
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
                                         color: _gender == 'Male'
@@ -581,7 +593,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           Icons.male_rounded,
                                           color: _gender == 'Male'
                                               ? AppColors.secondary
-                                              : AppColors.textSecondary,
+                                              : (isDark ? Colors.white54 : AppColors.textSecondary),
                                           size: 24,
                                         ),
                                         const SizedBox(height: 2),
@@ -590,7 +602,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           style: AppTextStyles.bodyMedium.copyWith(
                                             color: _gender == 'Male'
                                                 ? AppColors.secondary
-                                                : AppColors.textSecondary,
+                                                : (isDark ? Colors.white54 : AppColors.textSecondary),
                                             fontWeight: _gender == 'Male'
                                                 ? FontWeight.bold
                                                 : FontWeight.w500,
@@ -620,7 +632,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       'Height',
                                       style: AppTextStyles.bodyMedium.copyWith(
                                         fontSize: 13,
-                                        color: AppColors.textSecondary,
+                                        color: isDark ? Colors.white54 : AppColors.textSecondary,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -628,22 +640,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     TextFormField(
                                       controller: _heightController,
                                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                      style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                      ),
                                       decoration: InputDecoration(
                                         hintText: '165',
-                                        hintStyle: AppTextStyles.hintStyle,
+                                        hintStyle: AppTextStyles.hintStyle.copyWith(
+                                          color: isDark ? Colors.white30 : AppColors.textSecondary.withValues(alpha: 0.5),
+                                        ),
                                         filled: true,
-                                        fillColor: AppColors.fill,
-                                        prefixIcon: const Icon(Icons.height_rounded, color: AppColors.textSecondary, size: 20),
+                                        fillColor: isDark ? const Color(0xFF2C2C2C) : AppColors.fill,
+                                        prefixIcon: Icon(Icons.height_rounded, color: isDark ? Colors.white54 : AppColors.textSecondary, size: 20),
                                         suffixText: 'cm',
                                         suffixStyle: AppTextStyles.bodyMedium.copyWith(
-                                          color: AppColors.textSecondary,
+                                          color: isDark ? Colors.white70 : AppColors.textSecondary,
                                           fontWeight: FontWeight.bold,
                                         ),
                                         contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                                         enabledBorder: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(color: AppColors.border, width: 1),
+                                          borderSide: BorderSide(
+                                            color: isDark ? Colors.white12 : AppColors.border,
+                                            width: 1,
+                                          ),
                                         ),
                                         focusedBorder: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(12),
@@ -673,7 +693,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       'Weight',
                                       style: AppTextStyles.bodyMedium.copyWith(
                                         fontSize: 13,
-                                        color: AppColors.textSecondary,
+                                        color: isDark ? Colors.white54 : AppColors.textSecondary,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -681,22 +701,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     TextFormField(
                                       controller: _weightController,
                                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                      style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                      ),
                                       decoration: InputDecoration(
                                         hintText: '60',
-                                        hintStyle: AppTextStyles.hintStyle,
+                                        hintStyle: AppTextStyles.hintStyle.copyWith(
+                                          color: isDark ? Colors.white30 : AppColors.textSecondary.withValues(alpha: 0.5),
+                                        ),
                                         filled: true,
-                                        fillColor: AppColors.fill,
-                                        prefixIcon: const Icon(Icons.scale_rounded, color: AppColors.textSecondary, size: 20),
+                                        fillColor: isDark ? const Color(0xFF2C2C2C) : AppColors.fill,
+                                        prefixIcon: Icon(Icons.scale_rounded, color: isDark ? Colors.white54 : AppColors.textSecondary, size: 20),
                                         suffixText: 'kg',
                                         suffixStyle: AppTextStyles.bodyMedium.copyWith(
-                                          color: AppColors.textSecondary,
+                                          color: isDark ? Colors.white70 : AppColors.textSecondary,
                                           fontWeight: FontWeight.bold,
                                         ),
                                         contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                                         enabledBorder: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(color: AppColors.border, width: 1),
+                                          borderSide: BorderSide(
+                                            color: isDark ? Colors.white12 : AppColors.border,
+                                            width: 1,
+                                          ),
                                         ),
                                         focusedBorder: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(12),

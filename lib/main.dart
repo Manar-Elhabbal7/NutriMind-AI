@@ -42,34 +42,67 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // Global theme notifier for dynamic light/dark mode switching
+  static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'NutriMind AI',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          primary: AppColors.primary,
-          secondary: AppColors.secondary,
-          surface: AppColors.surface,
-        ),
-        scaffoldBackgroundColor: AppColors.background,
-        cardTheme: CardThemeData(
-          color: AppColors.surface,
-          elevation: 2,
-          shadowColor: AppColors.textPrimary.withAlpha(20),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, currentMode, child) {
+        return MaterialApp(
+          title: 'NutriMind AI',
+          debugShowCheckedModeBanner: false,
+          themeMode: currentMode,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AppColors.primary,
+              primary: AppColors.primary,
+              secondary: AppColors.secondary,
+              surface: AppColors.surface,
+              brightness: Brightness.light,
+            ),
+            scaffoldBackgroundColor: AppColors.background,
+            cardTheme: CardThemeData(
+              color: AppColors.surface,
+              elevation: 2,
+              shadowColor: AppColors.textPrimary.withAlpha(20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            dividerTheme: const DividerThemeData(
+              color: AppColors.border,
+              thickness: 1,
+            ),
           ),
-        ),
-        dividerTheme: const DividerThemeData(
-          color: AppColors.border,
-          thickness: 1,
-        ),
-      ),
-      home: const SplashView(),
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AppColors.primary,
+              primary: AppColors.primary,
+              secondary: AppColors.secondary,
+              surface: const Color(0xFF1E1E1E),
+              brightness: Brightness.dark,
+            ),
+            scaffoldBackgroundColor: const Color(0xFF121212),
+            cardTheme: CardThemeData(
+              color: const Color(0xFF1E1E1E),
+              elevation: 2,
+              shadowColor: Colors.black.withAlpha(40),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            dividerTheme: const DividerThemeData(
+              color: Color(0xFF2C2C2C),
+              thickness: 1,
+            ),
+          ),
+          home: const SplashView(),
+        );
+      },
     );
   }
 }

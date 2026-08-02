@@ -284,11 +284,13 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).colorScheme.onSurface, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
         titleSpacing: 0,
@@ -308,6 +310,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                   style: AppTextStyles.titleSecondary.copyWith(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 Row(
@@ -324,7 +327,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                     Text(
                       'AI Assistant • Online',
                       style: AppTextStyles.bodyRegular.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                         fontSize: 11,
                       ),
                     ),
@@ -334,12 +337,12 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
             ),
           ],
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         shape: Border(
           bottom: BorderSide(
-            color: AppColors.border.withValues(alpha: 0.5),
+            color: isDark ? Colors.white12 : AppColors.border.withValues(alpha: 0.5),
             width: 1,
           ),
         ),
@@ -380,14 +383,20 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                 ),
               );
             },
-            icon: const Icon(Icons.delete_outline, color: AppColors.textPrimary),
+            icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.onSurface),
           ),
           // Settings button removed
         ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.backgroundGradient,
+        decoration: BoxDecoration(
+          gradient: isDark
+              ? const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF121212), Color(0xFF1E1E1E)],
+                )
+              : AppColors.backgroundGradient,
         ),
         child: Column(
           children: [
@@ -413,19 +422,19 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(16),
                           topRight: Radius.circular(16),
                           bottomRight: Radius.circular(16),
                         ),
                         border: Border.all(
-                          color: AppColors.secondary.withValues(alpha: 0.08),
+                          color: isDark ? Colors.white12 : AppColors.secondary.withValues(alpha: 0.08),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.02),
+                            color: Colors.black.withValues(alpha: isDark ? 0.01 : 0.02),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -437,7 +446,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                           Text(
                             'NutriMind AI is thinking',
                             style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textSecondary,
+                              color: isDark ? Colors.white70 : AppColors.textSecondary,
                               fontSize: 13,
                             ),
                           ),
@@ -465,6 +474,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
   Widget _buildMessageBubble(ChatMessage message) {
     final bool isUser = message.isUser;
     final String timeStr = TimeOfDay.fromDateTime(message.timestamp).format(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (isUser) {
       return Padding(
@@ -548,9 +558,9 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                   child: Container(
                     margin: const EdgeInsets.fromLTRB(0, 4, 50, 4),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: const BoxDecoration(
-                      color: AppColors.secondaryExtraLight,
-                      borderRadius: BorderRadius.only(
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF252528) : AppColors.secondaryExtraLight,
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(18),
                         topRight: Radius.circular(18),
                         bottomLeft: Radius.circular(4),
@@ -560,21 +570,21 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                     child: MarkdownBody(
                       data: message.text,
                       styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                        p: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 14),
-                        strong: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                        code: const TextStyle(
-                          backgroundColor: Colors.black12, 
-                          color: AppColors.textPrimary, 
+                        p: AppTextStyles.bodyMedium.copyWith(color: isDark ? Colors.white70 : AppColors.textPrimary, fontSize: 14),
+                        strong: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : AppColors.textPrimary),
+                        code: TextStyle(
+                          backgroundColor: isDark ? Colors.white10 : Colors.black12, 
+                          color: isDark ? Colors.white : AppColors.textPrimary, 
                           fontFamily: 'monospace', 
                           fontSize: 13
                         ),
-                        h1: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold),
-                        h2: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
-                        h3: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
-                        listBullet: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
-                        blockquote: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                        h1: AppTextStyles.bodyMedium.copyWith(color: isDark ? Colors.white : AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold),
+                        h2: AppTextStyles.bodyMedium.copyWith(color: isDark ? Colors.white : AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+                        h3: AppTextStyles.bodyMedium.copyWith(color: isDark ? Colors.white : AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+                        listBullet: AppTextStyles.bodyMedium.copyWith(color: isDark ? Colors.white70 : AppColors.textPrimary),
+                        blockquote: AppTextStyles.bodyMedium.copyWith(color: isDark ? Colors.white54 : AppColors.textSecondary),
                         codeblockDecoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.05),
+                          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
@@ -600,6 +610,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
   }
 
   Widget _buildQuickRepliesSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 50,
       margin: const EdgeInsets.only(bottom: 4),
@@ -612,12 +623,12 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
           return Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: ActionChip(
-              backgroundColor: Colors.white,
+              backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
               elevation: 0,
               pressElevation: 2,
-              shadowColor: Colors.black.withValues(alpha: 0.04),
+              shadowColor: Colors.black.withValues(alpha: isDark ? 0.01 : 0.04),
               side: BorderSide(
-                color: AppColors.secondary.withValues(alpha: 0.15),
+                color: isDark ? Colors.white12 : AppColors.secondary.withValues(alpha: 0.15),
                 width: 1,
               ),
               shape: RoundedRectangleBorder(
@@ -645,20 +656,21 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
   }
 
   Widget _buildInputBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       top: false,
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 4, 16, 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
-            color: AppColors.border.withValues(alpha: 0.8),
+            color: isDark ? Colors.white12 : AppColors.border.withValues(alpha: 0.8),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withValues(alpha: isDark ? 0.01 : 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -675,12 +687,14 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                 maxLines: 5,
                 minLines: 1,
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 14.5,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Ask about nutrition, meals, mind...',
-                  hintStyle: AppTextStyles.hintStyle,
+                  hintStyle: AppTextStyles.hintStyle.copyWith(
+                    color: isDark ? Colors.white30 : AppColors.textSecondary.withValues(alpha: 0.5),
+                  ),
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
