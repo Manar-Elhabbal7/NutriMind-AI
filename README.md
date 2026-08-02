@@ -1,3 +1,4 @@
+<img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/f1b6cde8-6735-4ee4-a924-4c8984f9da03" />
 
 # NutriMind AI 🍏
 
