@@ -11,6 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'dart:io';
 import '../../auth/services/auth_service.dart';
 import '../../../main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<Widget> get _pages => [
-    const _BlankPage(title: 'Home Screen'),
+    const HomeScreenContent(),
     const ScanScreen(),
     const ProfileScreen(),
   ];
@@ -272,33 +274,209 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _BlankPage extends StatelessWidget {
-  const _BlankPage({required this.title});
+class HomeScreenContent extends StatefulWidget {
+  const HomeScreenContent({super.key});
 
-  final String title;
+  @override
+  State<HomeScreenContent> createState() => _HomeScreenContentState();
+}
+
+class _HomeScreenContentState extends State<HomeScreenContent> {
+  int _waterCups = 0; // Each cup is 250ml
+  final int _targetCups = 10; // Target is 2.5L (10 cups)
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWaterIntake();
+  }
+
+  Future<void> _loadWaterIntake() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _waterCups = prefs.getInt('daily_water_cups') ?? 0;
+    });
+  }
+
+  Future<void> _addWater() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      if (_waterCups < _targetCups) {
+        _waterCups++;
+        prefs.setInt('daily_water_cups', _waterCups);
+      }
+    });
+  }
+
+  Future<void> _resetWater() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _waterCups = 0;
+      prefs.setInt('daily_water_cups', 0);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentIntakeLiters = (_waterCups * 0.25).toStringAsFixed(2);
+    final targetIntakeLiters = (_targetCups * 0.25).toStringAsFixed(2);
+    final progress = _waterCups / _targetCups;
+
     return Container(
       decoration: BoxDecoration(
         gradient: isDark
             ? const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF1E1E1E), Color(0xFF121212)],
+                colors: [Color(0xFF121212), Color(0xFF1E1E1E)],
               )
             : AppColors.authBackgroundGradient,
       ),
-      child: SafeArea(
-        child: Center(
-          child: Text(
-            title,
-            style: AppTextStyles.titleSecondary.copyWith(
-              color: isDark ? Colors.white70 : AppColors.textPrimary.withValues(alpha: 0.4),
-              fontSize: 20,
-            ),
-          ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Safe spacing for the tall AppBar
+            const SizedBox(height: 120),
+
+            // Daily Hydration Tracker Card
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: isDark ? Colors.white12 : AppColors.border,
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.textPrimary.withValues(alpha: isDark ? 0.01 : 0.04),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Daily Tracker",
+                            style: GoogleFonts.poppins(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Track your hydration intake",
+                            style: GoogleFonts.poppins(
+                              color: isDark ? Colors.white54 : AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.secondary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.water_drop_rounded,
+                          color: AppColors.secondary,
+                          size: 24,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Progress display
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "${currentIntakeLiters}L / ${targetIntakeLiters}L",
+                        style: GoogleFonts.poppins(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "${(progress * 100).toInt()}%",
+                        style: GoogleFonts.poppins(
+                          color: AppColors.secondary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  
+                  // Progress bar
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: isDark ? Colors.white12 : AppColors.secondary.withValues(alpha: 0.1),
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.secondary),
+                      minHeight: 8,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Buttons Row
+                  Row(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: _addWater,
+                        icon: const Icon(Icons.add_rounded, size: 18),
+                        label: const Text("Add 250ml"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.secondary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      OutlinedButton(
+                        onPressed: _resetWater,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: isDark ? Colors.white70 : AppColors.textSecondary,
+                          side: BorderSide(color: isDark ? Colors.white24 : AppColors.border),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        ),
+                        child: const Text("Reset"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ).animate().fade(delay: 150.ms).slideY(begin: 0.1, end: 0, duration: 400.ms),
+
+            const SizedBox(height: 120), // clearance for bottom navigation bar
+          ],
         ),
       ),
     );
