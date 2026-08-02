@@ -89,3 +89,4 @@ coverage/
 *.postman_collection.json
 .env
 .env.*
+!.env.example

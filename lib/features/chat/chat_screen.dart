@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,53 +8,8 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 
-enum MessageType { text, image, file, audio }
-
-class ChatMessage {
-  final String text;
-  final bool isUser;
-  final DateTime timestamp;
-  final MessageType type;
-  final String? mediaPath;
-  final String? mediaName;
-  final String? mediaDuration;
-
-  ChatMessage({
-    required this.text,
-    required this.isUser,
-    required this.timestamp,
-    this.type = MessageType.text,
-    this.mediaPath,
-    this.mediaName,
-    this.mediaDuration,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'text': text,
-      'isUser': isUser,
-      'timestamp': timestamp.toIso8601String(),
-      'type': type.index,
-      'mediaPath': mediaPath,
-      'mediaName': mediaName,
-      'mediaDuration': mediaDuration,
-    };
-  }
-
-  factory ChatMessage.fromJson(Map<String, dynamic> json) {
-    return ChatMessage(
-      text: json['text'] ?? '',
-      isUser: json['isUser'] ?? false,
-      timestamp: DateTime.parse(
-        json['timestamp'] ?? DateTime.now().toIso8601String(),
-      ),
-      type: MessageType.values[json['type'] ?? 0],
-      mediaPath: json['mediaPath'],
-      mediaName: json['mediaName'],
-      mediaDuration: json['mediaDuration'],
-    );
-  }
-}
+import 'models/chat_message.dart';
+import 'widgets/typing_indicator.dart';
 
 class SupportChatScreen extends StatefulWidget {
   const SupportChatScreen({super.key});
@@ -206,9 +160,9 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
 
     // Call Gemini API
     try {
+      const String apiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: 'YOUR_API_KEY');
       final response = await _dio.post(
-        //note i have removed my api key for security reasons
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=YOUR_API_KEY',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$apiKey',
         data: {
           'contents': contents,
           'systemInstruction': {
@@ -867,63 +821,4 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
   }
 }
 
-// Typing Indicator Dot Animation
-class TypingIndicator extends StatefulWidget {
-  const TypingIndicator({super.key});
 
-  @override
-  State<TypingIndicator> createState() => _TypingIndicatorState();
-}
-
-class _TypingIndicatorState extends State<TypingIndicator>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(3, (index) {
-        return AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            final double offset = (index * 0.2);
-            double value =
-                (math.sin(
-                      (_controller.value * 2 * math.pi) -
-                          (offset * 2 * math.pi),
-                    ) +
-                    1) /
-                2;
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              width: 5,
-              height: 5,
-              decoration: BoxDecoration(
-                color: AppColors.secondary.withValues(
-                  alpha: 0.3 + (0.7 * value),
-                ),
-                shape: BoxShape.circle,
-              ),
-            );
-          },
-        );
-      }),
-    );
-  }
-}
