@@ -15,6 +15,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
+    if (kIsWeb) return;
     tz.initializeTimeZones();
     try {
       final TimezoneInfo timeZoneInfo =
@@ -48,6 +49,7 @@ class NotificationService {
   }
 
   Future<bool> requestPermissions() async {
+    if (kIsWeb) return false;
     final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
         flutterLocalNotificationsPlugin
             .resolvePlatformSpecificImplementation<
@@ -69,6 +71,7 @@ class NotificationService {
   }
 
   Future<void> scheduleWaterReminders() async {
+    if (kIsWeb) return;
     // Cancel any previous scheduled reminders to avoid duplication
     await cancelAllNotifications();
 
@@ -104,6 +107,7 @@ class NotificationService {
   }
 
   Future<void> cancelAllNotifications() async {
+    if (kIsWeb) return;
     await flutterLocalNotificationsPlugin.cancelAll();
   }
 }

@@ -43,8 +43,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() => _isGoogleLoading = true);
     try {
       final userCredential = await AuthService.instance.signInWithGoogle();
-      if (!mounted || userCredential == null || userCredential.user == null)
+      if (!mounted || userCredential == null || userCredential.user == null) {
         return;
+      }
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('show_onboarding', true);

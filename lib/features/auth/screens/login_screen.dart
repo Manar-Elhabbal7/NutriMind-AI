@@ -40,8 +40,9 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isGoogleLoading = true);
     try {
       final userCredential = await AuthService.instance.signInWithGoogle();
-      if (!mounted || userCredential == null || userCredential.user == null)
+      if (!mounted || userCredential == null || userCredential.user == null) {
         return;
+      }
 
       final user = userCredential.user!;
       if (userCredential.additionalUserInfo?.isNewUser ?? false) {
