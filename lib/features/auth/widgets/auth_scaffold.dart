@@ -20,9 +20,7 @@ class AuthScaffold extends StatelessWidget {
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: IntrinsicHeight(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
@@ -35,18 +33,22 @@ class AuthScaffold extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: IconButton(
-                                onPressed: () => Navigator.of(context).maybePop(),
+                                onPressed: () =>
+                                    Navigator.of(context).maybePop(),
                                 style: IconButton.styleFrom(
-                                  backgroundColor: Colors.white.withValues(alpha: 0.85),
+                                  backgroundColor: Colors.white.withValues(
+                                    alpha: 0.85,
+                                  ),
                                   foregroundColor: AppColors.textPrimary,
                                 ),
-                                icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+                                icon: const Icon(
+                                  Icons.arrow_back_ios_new,
+                                  size: 18,
+                                ),
                               ),
                             ),
                           ),
-                        Expanded(
-                          child: child,
-                        ),
+                        Expanded(child: child),
                       ],
                     ),
                   ),

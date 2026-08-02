@@ -20,7 +20,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _recipeDetailsFuture = RecipeService.instance.fetchRecipeDetails(widget.recipe);
+    _recipeDetailsFuture = RecipeService.instance.fetchRecipeDetails(
+      widget.recipe,
+    );
     _checkStarredStatus();
   }
 
@@ -101,13 +103,19 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 expandedHeight: 320,
                 pinned: true,
                 stretch: true,
-                backgroundColor: isDark ? const Color(0xFF121212) : AppColors.secondary,
+                backgroundColor: isDark
+                    ? const Color(0xFF121212)
+                    : AppColors.secondary,
                 leading: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CircleAvatar(
                     backgroundColor: Colors.black.withValues(alpha: 0.5),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -119,7 +127,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       backgroundColor: Colors.black.withValues(alpha: 0.5),
                       child: IconButton(
                         icon: Icon(
-                          _isStarred ? Icons.star_rounded : Icons.star_border_rounded,
+                          _isStarred
+                              ? Icons.star_rounded
+                              : Icons.star_border_rounded,
                           color: _isStarred ? Colors.amber : Colors.white,
                         ),
                         onPressed: () => _toggleStar(fullRecipe),
@@ -131,10 +141,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   background: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.network(
-                        fullRecipe.imageUrl,
-                        fit: BoxFit.cover,
-                      ),
+                      Image.network(fullRecipe.imageUrl, fit: BoxFit.cover),
                       const DecoratedBox(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -161,14 +168,19 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               SliverToBoxAdapter(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF121212) : AppColors.background,
+                    color: isDark
+                        ? const Color(0xFF121212)
+                        : AppColors.background,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(28),
                       topRight: Radius.circular(28),
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0,
+                      vertical: 24.0,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -181,11 +193,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : AppColors.textPrimary,
+                              color: isDark
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
                             ),
                           ),
                         ).animate().fade().slideY(begin: 0.1, end: 0),
-                        
+
                         const SizedBox(height: 8),
 
                         // Tags
@@ -193,9 +207,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppColors.secondary.withValues(alpha: 0.1),
+                                color: AppColors.secondary.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
@@ -209,13 +228,18 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             ),
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                fullRecipe.isDrink ? "Smoothie / Drink" : "Healthy Food",
+                                fullRecipe.isDrink
+                                    ? "Smoothie / Drink"
+                                    : "Healthy Food",
                                 style: GoogleFonts.poppins(
                                   color: AppColors.primary,
                                   fontSize: 12,
@@ -237,17 +261,21 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : AppColors.textPrimary,
+                              color: isDark
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
                             ),
                           ),
                         ).animate().fade(delay: 150.ms),
-                        
+
                         const SizedBox(height: 12),
 
                         if (fullRecipe.ingredients.isEmpty)
                           Text(
                             "No ingredients listed.",
-                            style: GoogleFonts.poppins(color: AppColors.textSecondary),
+                            style: GoogleFonts.poppins(
+                              color: AppColors.textSecondary,
+                            ),
                           )
                         else
                           ListView.builder(
@@ -258,34 +286,43 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             itemBuilder: (context, index) {
                               final ingredient = fullRecipe.ingredients[index];
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 6.0),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.primary,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.check,
-                                        color: Colors.white,
-                                        size: 10,
-                                      ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 6.0,
                                     ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        ingredient,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 14,
-                                          color: isDark ? Colors.white.withValues(alpha: 0.9) : AppColors.textPrimary,
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: const BoxDecoration(
+                                            color: AppColors.primary,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.check,
+                                            color: Colors.white,
+                                            size: 10,
+                                          ),
                                         ),
-                                      ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            ingredient,
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 14,
+                                              color: isDark
+                                                  ? Colors.white.withValues(
+                                                      alpha: 0.9,
+                                                    )
+                                                  : AppColors.textPrimary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ).animate().fade(delay: (200 + index * 30).ms).slideX(begin: -0.05, end: 0);
+                                  )
+                                  .animate()
+                                  .fade(delay: (200 + index * 30).ms)
+                                  .slideX(begin: -0.05, end: 0);
                             },
                           ),
 
@@ -300,11 +337,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : AppColors.textPrimary,
+                              color: isDark
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
                             ),
                           ),
                         ).animate().fade(delay: 250.ms),
-                        
+
                         const SizedBox(height: 12),
 
                         if (steps.isEmpty)
@@ -315,7 +354,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               height: 1.6,
-                              color: isDark ? Colors.white.withValues(alpha: 0.9) : AppColors.textPrimary,
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.9)
+                                  : AppColors.textPrimary,
                             ),
                           )
                         else
@@ -327,36 +368,46 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             itemBuilder: (context, index) {
                               final step = steps[index];
                               return Padding(
-                                padding: const EdgeInsets.only(bottom: 16.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 12,
-                                      backgroundColor: AppColors.secondary,
-                                      child: Text(
-                                        "${index + 1}",
-                                        style: GoogleFonts.poppins(
-                                          color: Colors.white,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                    padding: const EdgeInsets.only(
+                                      bottom: 16.0,
                                     ),
-                                    const SizedBox(width: 14),
-                                    Expanded(
-                                      child: Text(
-                                        step,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 14,
-                                          height: 1.5,
-                                          color: isDark ? Colors.white.withValues(alpha: 0.9) : AppColors.textPrimary,
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 12,
+                                          backgroundColor: AppColors.secondary,
+                                          child: Text(
+                                            "${index + 1}",
+                                            style: GoogleFonts.poppins(
+                                              color: Colors.white,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        const SizedBox(width: 14),
+                                        Expanded(
+                                          child: Text(
+                                            step,
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 14,
+                                              height: 1.5,
+                                              color: isDark
+                                                  ? Colors.white.withValues(
+                                                      alpha: 0.9,
+                                                    )
+                                                  : AppColors.textPrimary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ).animate().fade(delay: (300 + index * 40).ms).slideY(begin: 0.05, end: 0);
+                                  )
+                                  .animate()
+                                  .fade(delay: (300 + index * 40).ms)
+                                  .slideY(begin: 0.05, end: 0);
                             },
                           ),
                       ],

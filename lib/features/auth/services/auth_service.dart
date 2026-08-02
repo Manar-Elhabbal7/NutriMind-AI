@@ -29,10 +29,7 @@ class AuthService {
     required String email,
     required String password,
   }) {
-    return _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    return _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
   /// Create Account with Email & Password
@@ -59,7 +56,8 @@ class AuthService {
     if (googleUser == null) return null;
 
     // Obtain auth details from the request
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
 
     // Create a new credential
     final OAuthCredential credential = GoogleAuthProvider.credential(

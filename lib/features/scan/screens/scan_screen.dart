@@ -47,7 +47,8 @@ class _ScanScreenState extends State<ScanScreen> {
     if (kIsWeb) {
       setState(() {
         _hasError = true;
-        _errorMsg = "Live camera view is not supported on web browsers. Use upload option instead.";
+        _errorMsg =
+            "Live camera view is not supported on web browsers. Use upload option instead.";
       });
       return;
     }
@@ -90,7 +91,8 @@ class _ScanScreenState extends State<ScanScreen> {
       if (mounted) {
         setState(() {
           _hasError = true;
-          _errorMsg = "Camera access denied. Please enable camera permissions in your settings.";
+          _errorMsg =
+              "Camera access denied. Please enable camera permissions in your settings.";
         });
       }
     }
@@ -107,8 +109,10 @@ class _ScanScreenState extends State<ScanScreen> {
     if (_controller == null || !_controller!.value.isInitialized) return;
 
     // Calculate focal point
-    final double x = details.localPosition.dx / MediaQuery.of(context).size.width;
-    final double y = details.localPosition.dy / MediaQuery.of(context).size.height;
+    final double x =
+        details.localPosition.dx / MediaQuery.of(context).size.width;
+    final double y =
+        details.localPosition.dy / MediaQuery.of(context).size.height;
     final Offset focusPoint = Offset(x, y);
 
     try {
@@ -136,7 +140,9 @@ class _ScanScreenState extends State<ScanScreen> {
   Future<void> _toggleFlash() async {
     if (_controller == null || !_isCameraReady) return;
     try {
-      final nextMode = _flashMode == FlashMode.off ? FlashMode.torch : FlashMode.off;
+      final nextMode = _flashMode == FlashMode.off
+          ? FlashMode.torch
+          : FlashMode.off;
       await _controller!.setFlashMode(nextMode);
       setState(() {
         _flashMode = nextMode;
@@ -214,10 +220,7 @@ class _ScanScreenState extends State<ScanScreen> {
           ),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: _ScanResultDetailsSheet(
-              photo: photoFile,
-              dio: _dio,
-            ),
+            child: _ScanResultDetailsSheet(photo: photoFile, dio: _dio),
           ),
         );
       },
@@ -260,7 +263,10 @@ class _ScanScreenState extends State<ScanScreen> {
                 const SizedBox(height: 24),
                 Text(
                   "Camera Setup",
-                  style: AppTextStyles.titleSecondary.copyWith(color: Colors.white, fontSize: 20),
+                  style: AppTextStyles.titleSecondary.copyWith(
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -268,7 +274,10 @@ class _ScanScreenState extends State<ScanScreen> {
                       ? _errorMsg
                       : "Setting up the scanner. If you are on an emulator, please upload a photo from gallery instead.",
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.bodyRegular.copyWith(color: Colors.white70, fontSize: 14),
+                  style: AppTextStyles.bodyRegular.copyWith(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 32),
                 Row(
@@ -276,26 +285,59 @@ class _ScanScreenState extends State<ScanScreen> {
                   children: [
                     ElevatedButton.icon(
                       onPressed: _pickFromCamera,
-                      icon: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 16),
-                      label: const Text("Take Photo", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      icon: const Icon(
+                        Icons.camera_alt_rounded,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                      label: const Text(
+                        "Take Photo",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.secondary,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         elevation: 2,
                       ),
                     ),
                     const SizedBox(width: 12),
                     OutlinedButton.icon(
                       onPressed: _pickFromGallery,
-                      icon: const Icon(Icons.photo_library_rounded, color: AppColors.secondary, size: 16),
-                      label: const Text("Upload", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      icon: const Icon(
+                        Icons.photo_library_rounded,
+                        color: AppColors.secondary,
+                        size: 16,
+                      ),
+                      label: const Text(
+                        "Upload",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.secondary, width: 1.5),
+                        side: const BorderSide(
+                          color: AppColors.secondary,
+                          width: 1.5,
+                        ),
                         foregroundColor: AppColors.secondary,
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ],
@@ -334,39 +376,100 @@ class _ScanScreenState extends State<ScanScreen> {
               width: size.width * 0.72,
               height: size.width * 0.72,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 2),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  width: 2,
+                ),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Stack(
                 children: [
                   // Corner brackets for professional feel
                   Positioned(
-                    left: 0, top: 0,
-                    child: Container(width: 24, height: 24, decoration: const BoxDecoration(
-                      border: Border(left: BorderSide(color: AppColors.secondary, width: 4), top: BorderSide(color: AppColors.secondary, width: 4)),
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(8)),
-                    )),
+                    left: 0,
+                    top: 0,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: AppColors.secondary,
+                            width: 4,
+                          ),
+                          top: BorderSide(color: AppColors.secondary, width: 4),
+                        ),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                        ),
+                      ),
+                    ),
                   ),
                   Positioned(
-                    right: 0, top: 0,
-                    child: Container(width: 24, height: 24, decoration: const BoxDecoration(
-                      border: Border(right: BorderSide(color: AppColors.secondary, width: 4), top: BorderSide(color: AppColors.secondary, width: 4)),
-                      borderRadius: BorderRadius.only(topRight: Radius.circular(8)),
-                    )),
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          right: BorderSide(
+                            color: AppColors.secondary,
+                            width: 4,
+                          ),
+                          top: BorderSide(color: AppColors.secondary, width: 4),
+                        ),
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(8),
+                        ),
+                      ),
+                    ),
                   ),
                   Positioned(
-                    left: 0, bottom: 0,
-                    child: Container(width: 24, height: 24, decoration: const BoxDecoration(
-                      border: Border(left: BorderSide(color: AppColors.secondary, width: 4), bottom: BorderSide(color: AppColors.secondary, width: 4)),
-                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(8)),
-                    )),
+                    left: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: AppColors.secondary,
+                            width: 4,
+                          ),
+                          bottom: BorderSide(
+                            color: AppColors.secondary,
+                            width: 4,
+                          ),
+                        ),
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(8),
+                        ),
+                      ),
+                    ),
                   ),
                   Positioned(
-                    right: 0, bottom: 0,
-                    child: Container(width: 24, height: 24, decoration: const BoxDecoration(
-                      border: Border(right: BorderSide(color: AppColors.secondary, width: 4), bottom: BorderSide(color: AppColors.secondary, width: 4)),
-                      borderRadius: BorderRadius.only(bottomRight: Radius.circular(8)),
-                    )),
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          right: BorderSide(
+                            color: AppColors.secondary,
+                            width: 4,
+                          ),
+                          bottom: BorderSide(
+                            color: AppColors.secondary,
+                            width: 4,
+                          ),
+                        ),
+                        borderRadius: BorderRadius.only(
+                          bottomRight: Radius.circular(8),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -379,28 +482,37 @@ class _ScanScreenState extends State<ScanScreen> {
               width: size.width * 0.72,
               height: size.width * 0.72,
               alignment: Alignment.topCenter,
-              child: Container(
-                width: size.width * 0.68,
-                height: 3,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.secondary.withValues(alpha: 0.1),
-                      AppColors.secondary,
-                      AppColors.secondary.withValues(alpha: 0.1),
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.secondary.withValues(alpha: 0.5),
-                      blurRadius: 8,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-              )
-              .animate(onPlay: (controller) => controller.repeat(reverse: true))
-              .slideY(begin: 0.05, end: 12.0, duration: 2500.ms, curve: Curves.easeInOut),
+              child:
+                  Container(
+                        width: size.width * 0.68,
+                        height: 3,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.secondary.withValues(alpha: 0.1),
+                              AppColors.secondary,
+                              AppColors.secondary.withValues(alpha: 0.1),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.secondary.withValues(alpha: 0.5),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                      )
+                      .animate(
+                        onPlay: (controller) =>
+                            controller.repeat(reverse: true),
+                      )
+                      .slideY(
+                        begin: 0.05,
+                        end: 12.0,
+                        duration: 2500.ms,
+                        curve: Curves.easeInOut,
+                      ),
             ),
           ),
 
@@ -418,7 +530,11 @@ class _ScanScreenState extends State<ScanScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     onPressed: () => Navigator.maybePop(context),
                   ),
                 ),
@@ -429,8 +545,12 @@ class _ScanScreenState extends State<ScanScreen> {
                   ),
                   child: IconButton(
                     icon: Icon(
-                      _flashMode == FlashMode.torch ? Icons.flash_on : Icons.flash_off,
-                      color: _flashMode == FlashMode.torch ? Colors.yellow : Colors.white,
+                      _flashMode == FlashMode.torch
+                          ? Icons.flash_on
+                          : Icons.flash_off,
+                      color: _flashMode == FlashMode.torch
+                          ? Colors.yellow
+                          : Colors.white,
                       size: 20,
                     ),
                     onPressed: _toggleFlash,
@@ -445,17 +565,25 @@ class _ScanScreenState extends State<ScanScreen> {
             Positioned(
               left: _tapPosition!.dx - 28,
               top: _tapPosition!.dy - 28,
-              child: Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.secondary, width: 2),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              )
-              .animate()
-              .scale(begin: const Offset(1.4, 1.4), end: const Offset(1.0, 1.0), duration: 200.ms)
-              .fadeOut(delay: 800.ms, duration: 200.ms),
+              child:
+                  Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AppColors.secondary,
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      )
+                      .animate()
+                      .scale(
+                        begin: const Offset(1.4, 1.4),
+                        end: const Offset(1.0, 1.0),
+                        duration: 200.ms,
+                      )
+                      .fadeOut(delay: 800.ms, duration: 200.ms),
             ),
 
           // Bottom Controller Bar
@@ -468,7 +596,10 @@ class _ScanScreenState extends State<ScanScreen> {
               children: [
                 Text(
                   "Place the food inside the box to scan",
-                  style: AppTextStyles.bodyRegular.copyWith(color: Colors.white.withValues(alpha: 0.8), fontSize: 13),
+                  style: AppTextStyles.bodyRegular.copyWith(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 13,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -483,7 +614,11 @@ class _ScanScreenState extends State<ScanScreen> {
                           color: Colors.white.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.photo_library_rounded, color: Colors.white, size: 24),
+                        child: const Icon(
+                          Icons.photo_library_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
                       ),
                     ),
 
@@ -496,7 +631,10 @@ class _ScanScreenState extends State<ScanScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.secondary, width: 4),
+                          border: Border.all(
+                            color: AppColors.secondary,
+                            width: 4,
+                          ),
                         ),
                         child: Center(
                           child: Container(
@@ -519,7 +657,8 @@ class _ScanScreenState extends State<ScanScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const StarredRecipesScreen(),
+                              builder: (context) =>
+                                  const StarredRecipesScreen(),
                             ),
                           );
                         },
@@ -529,7 +668,11 @@ class _ScanScreenState extends State<ScanScreen> {
                             color: Colors.white.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.star_rounded, color: Colors.amber, size: 24),
+                          child: const Icon(
+                            Icons.star_rounded,
+                            color: Colors.amber,
+                            size: 24,
+                          ),
                         ),
                       ),
                     ),
@@ -548,13 +691,11 @@ class _ScanResultDetailsSheet extends StatefulWidget {
   final XFile photo;
   final Dio dio;
 
-  const _ScanResultDetailsSheet({
-    required this.photo,
-    required this.dio,
-  });
+  const _ScanResultDetailsSheet({required this.photo, required this.dio});
 
   @override
-  State<_ScanResultDetailsSheet> createState() => _ScanResultDetailsSheetState();
+  State<_ScanResultDetailsSheet> createState() =>
+      _ScanResultDetailsSheetState();
 }
 
 class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
@@ -600,14 +741,11 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
               'parts': [
                 {'text': prompt},
                 {
-                  'inlineData': {
-                    'mimeType': 'image/jpeg',
-                    'data': base64Image,
-                  }
-                }
-              ]
-            }
-          ]
+                  'inlineData': {'mimeType': 'image/jpeg', 'data': base64Image},
+                },
+              ],
+            },
+          ],
         },
         options: Options(
           headers: {'Content-Type': 'application/json'},
@@ -635,7 +773,9 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
       }
 
       // Parse Metrics Line
-      final regex = RegExp(r'METRICS:\s*Name=(.*?),\s*Calories=(.*?),\s*Carbs=(.*?),\s*Protein=(.*?),\s*Fats=(.*)');
+      final regex = RegExp(
+        r'METRICS:\s*Name=(.*?),\s*Calories=(.*?),\s*Carbs=(.*?),\s*Protein=(.*?),\s*Fats=(.*)',
+      );
       final match = regex.firstMatch(content);
 
       String mainAnalysis = content;
@@ -704,8 +844,8 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
             child: _isLoading
                 ? _buildLoadingWidget()
                 : _errorMessage != null
-                    ? _buildErrorWidget()
-                    : _buildResultsWidget(),
+                ? _buildErrorWidget()
+                : _buildResultsWidget(),
           ),
         ],
       ),
@@ -728,7 +868,9 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
           Text(
             "NutriMind AI is scanning details and calculating nutrition values...",
             textAlign: TextAlign.center,
-            style: AppTextStyles.bodyRegular.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.bodyRegular.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -741,17 +883,26 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 64),
+          const Icon(
+            Icons.error_outline_rounded,
+            color: Colors.redAccent,
+            size: 64,
+          ),
           const SizedBox(height: 16),
           Text(
             "Analysis Failed",
-            style: AppTextStyles.titleSecondary.copyWith(fontSize: 18, color: Colors.redAccent),
+            style: AppTextStyles.titleSecondary.copyWith(
+              fontSize: 18,
+              color: Colors.redAccent,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             _errorMessage ?? "An unexpected network error occurred.",
             textAlign: TextAlign.center,
-            style: AppTextStyles.bodyRegular.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.bodyRegular.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
@@ -765,7 +916,9 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.secondary,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: const Text("Retry"),
           ),
@@ -806,20 +959,30 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.secondary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       "SCAN RESULT",
-                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.secondary, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.secondary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _foodName,
-                    style: AppTextStyles.titleSecondary.copyWith(fontSize: 20, color: AppColors.textPrimary),
+                    style: AppTextStyles.titleSecondary.copyWith(
+                      fontSize: 20,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ],
               ),
@@ -900,7 +1063,11 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
 
         Text(
           "Detailed Analysis",
-          style: AppTextStyles.bodyMedium.copyWith(fontSize: 16, color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontSize: 16,
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
 
@@ -908,12 +1075,33 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
         MarkdownBody(
           data: _analysisText,
           styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-            p: AppTextStyles.bodyRegular.copyWith(color: AppColors.textPrimary, fontSize: 14.5, height: 1.5),
-            strong: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-            listBullet: AppTextStyles.bodyRegular.copyWith(color: AppColors.textPrimary),
-            h1: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
-            h2: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
-            h3: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
+            p: AppTextStyles.bodyRegular.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 14.5,
+              height: 1.5,
+            ),
+            strong: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+            listBullet: AppTextStyles.bodyRegular.copyWith(
+              color: AppColors.textPrimary,
+            ),
+            h1: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            h2: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            h3: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
             horizontalRuleDecoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
@@ -934,7 +1122,9 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
             backgroundColor: AppColors.secondary,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
           child: const Text("Done"),
         ),
@@ -954,7 +1144,10 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
       decoration: BoxDecoration(
         color: accentColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accentColor.withValues(alpha: 0.25), width: 1),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.25),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -963,12 +1156,19 @@ class _ScanResultDetailsSheetState extends State<_ScanResultDetailsSheet> {
           const SizedBox(height: 8),
           Text(
             value,
-            style: AppTextStyles.bodyMedium.copyWith(fontSize: 14, color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontSize: 14,
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             title,
-            style: AppTextStyles.bodyRegular.copyWith(fontSize: 10, color: AppColors.textSecondary),
+            style: AppTextStyles.bodyRegular.copyWith(
+              fontSize: 10,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),

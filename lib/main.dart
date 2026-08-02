@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/theme/app_colors.dart';
 import 'features/splash/splash_view.dart';
+import 'core/services/notification_service.dart';
 
 import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.instance.init();
+  await NotificationService.instance.scheduleWaterReminders();
   try {
     if (kIsWeb) {
       await Firebase.initializeApp(
@@ -43,7 +46,9 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   // Global theme notifier for dynamic light/dark mode switching
-  static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+  static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(
+    ThemeMode.light,
+  );
 
   @override
   Widget build(BuildContext context) {

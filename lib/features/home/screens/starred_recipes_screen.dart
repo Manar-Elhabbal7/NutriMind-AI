@@ -80,59 +80,64 @@ class _StarredRecipesScreenState extends State<StarredRecipesScreen> {
               : AppColors.backgroundGradient,
         ),
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: AppColors.secondary))
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.secondary),
+              )
             : _starredRecipes.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.star_outline_rounded,
-                            size: 80,
-                            color: isDark ? Colors.white24 : AppColors.hint,
-                          ).animate().scale(duration: 400.ms),
-                          const SizedBox(height: 20),
-                          Text(
-                            "No Favorites Yet",
-                            style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "Browse categories on the Home tab and tap the star icon to save your favorite recipes here.",
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              color: isDark ? Colors.white70 : AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.star_outline_rounded,
+                        size: 80,
+                        color: isDark ? Colors.white24 : AppColors.hint,
+                      ).animate().scale(duration: 400.ms),
+                      const SizedBox(height: 20),
+                      Text(
+                        "No Favorites Yet",
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                  )
-                : GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 1.45,
-                    ),
-                    itemCount: _starredRecipes.length,
-                    itemBuilder: (context, index) {
-                      final recipe = _starredRecipes[index];
+                      const SizedBox(height: 8),
+                      Text(
+                        "Browse categories on the Home tab and tap the star icon to save your favorite recipes here.",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: isDark
+                              ? Colors.white70
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.45,
+                ),
+                itemCount: _starredRecipes.length,
+                itemBuilder: (context, index) {
+                  final recipe = _starredRecipes[index];
 
-                      return GestureDetector(
+                  return GestureDetector(
                         onTap: () async {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => RecipeDetailScreen(recipe: recipe),
+                              builder: (context) =>
+                                  RecipeDetailScreen(recipe: recipe),
                             ),
                           );
                           _loadStarredRecipes();
@@ -142,7 +147,9 @@ class _StarredRecipesScreenState extends State<StarredRecipesScreen> {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                                color: Colors.black.withValues(
+                                  alpha: isDark ? 0.3 : 0.08,
+                                ),
                                 blurRadius: 8,
                                 offset: const Offset(0, 3),
                               ),
@@ -157,10 +164,17 @@ class _StarredRecipesScreenState extends State<StarredRecipesScreen> {
                                   child: Image.network(
                                     recipe.imageUrl,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => Container(
-                                      color: isDark ? Colors.white12 : AppColors.fill,
-                                      child: const Icon(Icons.broken_image_rounded, color: AppColors.secondary),
-                                    ),
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Container(
+                                              color: isDark
+                                                  ? Colors.white12
+                                                  : AppColors.fill,
+                                              child: const Icon(
+                                                Icons.broken_image_rounded,
+                                                color: AppColors.secondary,
+                                              ),
+                                            ),
                                   ),
                                 ),
                                 // Dark Gradient Overlay for readability
@@ -203,7 +217,9 @@ class _StarredRecipesScreenState extends State<StarredRecipesScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.all(5),
                                       decoration: BoxDecoration(
-                                        color: Colors.black.withValues(alpha: 0.5),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.5,
+                                        ),
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(
@@ -218,9 +234,12 @@ class _StarredRecipesScreenState extends State<StarredRecipesScreen> {
                             ),
                           ),
                         ),
-                      ).animate().fade(delay: (index * 50).ms).slideY(begin: 0.1, end: 0);
-                    },
-                  ),
+                      )
+                      .animate()
+                      .fade(delay: (index * 50).ms)
+                      .slideY(begin: 0.1, end: 0);
+                },
+              ),
       ),
     );
   }

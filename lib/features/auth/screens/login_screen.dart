@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_form_field.dart';
@@ -39,33 +40,35 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isGoogleLoading = true);
     try {
       final userCredential = await AuthService.instance.signInWithGoogle();
-      if (!mounted || userCredential == null || userCredential.user == null) return;
+      if (!mounted || userCredential == null || userCredential.user == null)
+        return;
 
       final user = userCredential.user!;
+      if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('show_onboarding', true);
+      }
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Welcome, ${user.displayName ?? user.email}!'),
           behavior: SnackBarBehavior.floating,
         ),
       );
-      if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => const HomeScreen(),
-        ),
+        MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
       );
     } catch (e) {
       if (!mounted) return;
       String message = e.toString().split(']').last.trim();
       if (message.toLowerCase().contains('no firebase') ||
           message.toLowerCase().contains('initializ')) {
-        message = 'Authentication service is currently unavailable. Please check your setup.';
+        message =
+            'Authentication service is currently unavailable. Please check your setup.';
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-        ),
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
       );
     } finally {
       if (mounted) setState(() => _isGoogleLoading = false);
@@ -89,22 +92,18 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => const HomeScreen(),
-        ),
+        MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
       );
     } catch (e) {
       if (!mounted) return;
       String message = e.toString().split(']').last.trim();
       if (message.toLowerCase().contains('no firebase') ||
           message.toLowerCase().contains('initializ')) {
-        message = 'Authentication service is currently unavailable. Please check your setup.';
+        message =
+            'Authentication service is currently unavailable. Please check your setup.';
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-        ),
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -118,9 +117,9 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           const Spacer(flex: 2),
           AuthBrandHeader(
-                subtitle:
-                    'Welcome back! Sign in to continue your nutrition journey',
-              ),
+            subtitle:
+                'Welcome back! Sign in to continue your nutrition journey',
+          ),
           const Spacer(flex: 1),
           AuthFormCard(
                 child: Form(

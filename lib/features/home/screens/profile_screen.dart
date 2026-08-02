@@ -9,6 +9,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../auth/services/auth_service.dart';
 import '../../auth/screens/login_screen.dart';
+import '../../../core/services/notification_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,23 +20,25 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Controllers
   final _nameController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
-  
+
   // State variables
   String _email = '';
   String _gender = 'Female'; // Default gender
   String _profilePhotoPath = '';
   String _bannerPhotoPath = '';
+  bool _waterReminderEnabled = true;
   bool _isLoading = false;
   bool _isSaving = false;
 
   // Defaults
   static const String _defaultProfilePhoto = 'assets/images/girl.png';
-  static const String _defaultBannerPhoto = 'assets/images/profile_background1.jpeg';
+  static const String _defaultBannerPhoto =
+      'assets/images/profile_background1.jpeg';
 
   @override
   void initState() {
@@ -70,15 +73,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (_nameController.text.isEmpty) {
           _nameController.text = prefs.getString('profile_display_name') ?? '';
         }
-        
+
         // Load other physical metrics
         _gender = prefs.getString('profile_gender') ?? 'Female';
         _heightController.text = prefs.getString('profile_height') ?? '';
         _weightController.text = prefs.getString('profile_weight') ?? '';
-        
+
         // Load photo paths
-        _profilePhotoPath = prefs.getString('profile_photo_path') ?? _profilePhotoPath;
+        _profilePhotoPath =
+            prefs.getString('profile_photo_path') ?? _profilePhotoPath;
         _bannerPhotoPath = prefs.getString('profile_banner_path') ?? '';
+        _waterReminderEnabled = prefs.getBool('water_reminder_enabled') ?? true;
       });
     } catch (e) {
       debugPrint('Error loading profile data: $e');
@@ -96,20 +101,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _isSaving = true);
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Save local metrics
-      await prefs.setString('profile_display_name', _nameController.text.trim());
+      await prefs.setString(
+        'profile_display_name',
+        _nameController.text.trim(),
+      );
       await prefs.setString('profile_gender', _gender);
       await prefs.setString('profile_height', _heightController.text.trim());
       await prefs.setString('profile_weight', _weightController.text.trim());
       await prefs.setString('profile_photo_path', _profilePhotoPath);
       await prefs.setString('profile_banner_path', _bannerPhotoPath);
+      await prefs.setBool('water_reminder_enabled', _waterReminderEnabled);
+
+      // Handle water reminder scheduling & permissions
+      if (_waterReminderEnabled) {
+        final granted = await NotificationService.instance.requestPermissions();
+        if (!granted && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Please enable notification permissions in system settings to receive reminders.',
+                style: AppTextStyles.bodyMedium.copyWith(color: Colors.white),
+              ),
+              backgroundColor: AppColors.secondary,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        await NotificationService.instance.scheduleWaterReminders();
+      } else {
+        await NotificationService.instance.cancelAllNotifications();
+      }
 
       // Save display name and photoURL in Firebase Auth
       final user = AuthService.instance.currentUser;
       if (user != null) {
         await user.updateDisplayName(_nameController.text.trim());
-        if (_profilePhotoPath.isNotEmpty && !_profilePhotoPath.startsWith('assets/')) {
+        if (_profilePhotoPath.isNotEmpty &&
+            !_profilePhotoPath.startsWith('assets/')) {
           try {
             await user.updatePhotoURL(_profilePhotoPath);
           } catch (e) {
@@ -134,7 +164,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -172,7 +204,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.photo_library_rounded, color: AppColors.secondary),
+                leading: const Icon(
+                  Icons.photo_library_rounded,
+                  color: AppColors.secondary,
+                ),
                 title: const Text('Choose from Gallery'),
                 onTap: () async {
                   Navigator.pop(context);
@@ -180,7 +215,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.camera_alt_rounded, color: AppColors.secondary),
+                leading: const Icon(
+                  Icons.camera_alt_rounded,
+                  color: AppColors.secondary,
+                ),
                 title: const Text('Take a Photo'),
                 onTap: () async {
                   Navigator.pop(context);
@@ -213,9 +251,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(source == ImageSource.camera
-                ? 'Could not access camera.'
-                : 'Could not access image gallery.'),
+            content: Text(
+              source == ImageSource.camera
+                  ? 'Could not access camera.'
+                  : 'Could not access image gallery.',
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -267,7 +307,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (path.isEmpty) {
       return AssetImage(isProfile ? _defaultProfilePhoto : _defaultBannerPhoto);
     }
-    
+
     if (path.startsWith('assets/')) {
       return AssetImage(path);
     }
@@ -363,7 +403,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
-                
+
                 // Profile image overlapping the banner
                 Positioned(
                   bottom: -72,
@@ -388,7 +428,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                             image: DecorationImage(
-                              image: _buildImageProvider(_profilePhotoPath, true),
+                              image: _buildImageProvider(
+                                _profilePhotoPath,
+                                true,
+                              ),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -423,7 +466,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 80),
 
             // Form Content
@@ -434,7 +477,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     // Display Name Input
-                     TextFormField(
+                    TextFormField(
                       controller: _nameController,
                       style: AppTextStyles.titleSecondary.copyWith(
                         fontSize: 22,
@@ -446,13 +489,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         hintText: 'Enter your name',
                         hintStyle: AppTextStyles.hintStyle.copyWith(
                           fontSize: 18,
-                          color: isDark ? Colors.white30 : AppColors.textSecondary.withValues(alpha: 0.5),
+                          color: isDark
+                              ? Colors.white30
+                              : AppColors.textSecondary.withValues(alpha: 0.5),
                         ),
                         border: InputBorder.none,
                         focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.secondary.withValues(alpha: 0.5), width: 1.5),
+                          borderSide: BorderSide(
+                            color: AppColors.secondary.withValues(alpha: 0.5),
+                            width: 1.5,
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 8,
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -460,295 +511,569 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         }
                         return null;
                       },
-                    ).animate().fade().slideY(begin: 0.1, end: 0, duration: 300.ms),
-                    
+                    ).animate().fade().slideY(
+                      begin: 0.1,
+                      end: 0,
+                      duration: 300.ms,
+                    ),
+
                     const SizedBox(height: 4),
 
                     // Email (Read-only)
                     Text(
                       _email.isNotEmpty ? _email : 'no-email@nutrimind.com',
                       style: AppTextStyles.bodyRegular.copyWith(
-                        color: isDark ? Colors.white54 : AppColors.textSecondary,
+                        color: isDark
+                            ? Colors.white54
+                            : AppColors.textSecondary,
                         fontSize: 14,
                       ),
-                    ).animate().fade().slideY(begin: 0.1, end: 0, delay: 50.ms, duration: 300.ms),
+                    ).animate().fade().slideY(
+                      begin: 0.1,
+                      end: 0,
+                      delay: 50.ms,
+                      duration: 300.ms,
+                    ),
 
                     const SizedBox(height: 24),
 
                     // 2. Physical Metrics Card
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: isDark ? Colors.white12 : AppColors.border,
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.textPrimary.withValues(alpha: isDark ? 0.01 : 0.04),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Physical Profile',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF1E1E1E)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: isDark ? Colors.white12 : AppColors.border,
+                              width: 1,
                             ),
-                          ),
-                          Divider(
-                            height: 20,
-                            color: isDark ? Colors.white12 : AppColors.divider,
-                          ),
-
-                          // Gender Selection Box
-                          Text(
-                            'Gender',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              fontSize: 13,
-                              color: isDark ? Colors.white54 : AppColors.textSecondary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              // Female Option
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _gender = 'Female'),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 250),
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: _gender == 'Female'
-                                          ? AppColors.primaryExtraLight.withValues(alpha: isDark ? 0.25 : 1.0)
-                                          : (isDark ? const Color(0xFF2C2C2C) : AppColors.fill),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: _gender == 'Female'
-                                            ? AppColors.secondary.withValues(alpha: 0.5)
-                                            : Colors.transparent,
-                                        width: 1.5,
-                                      ),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Icon(
-                                          Icons.female_rounded,
-                                          color: _gender == 'Female'
-                                              ? AppColors.secondary
-                                              : (isDark ? Colors.white54 : AppColors.textSecondary),
-                                          size: 24,
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'Female',
-                                          style: AppTextStyles.bodyMedium.copyWith(
-                                            color: _gender == 'Female'
-                                                ? AppColors.secondary
-                                                : (isDark ? Colors.white54 : AppColors.textSecondary),
-                                            fontWeight: _gender == 'Female'
-                                                ? FontWeight.bold
-                                                : FontWeight.w500,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.textPrimary.withValues(
+                                  alpha: isDark ? 0.01 : 0.04,
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-                              // Male Option
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _gender = 'Male'),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 250),
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: _gender == 'Male'
-                                          ? AppColors.secondaryExtraLight.withValues(alpha: isDark ? 0.25 : 1.0)
-                                          : (isDark ? const Color(0xFF2C2C2C) : AppColors.fill),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: _gender == 'Male'
-                                            ? AppColors.secondary.withValues(alpha: 0.5)
-                                            : Colors.transparent,
-                                        width: 1.5,
-                                      ),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Icon(
-                                          Icons.male_rounded,
-                                          color: _gender == 'Male'
-                                              ? AppColors.secondary
-                                              : (isDark ? Colors.white54 : AppColors.textSecondary),
-                                          size: 24,
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'Male',
-                                          style: AppTextStyles.bodyMedium.copyWith(
-                                            color: _gender == 'Male'
-                                                ? AppColors.secondary
-                                                : (isDark ? Colors.white54 : AppColors.textSecondary),
-                                            fontWeight: _gender == 'Male'
-                                                ? FontWeight.bold
-                                                : FontWeight.w500,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
                               ),
                             ],
                           ),
-                          
-                          const SizedBox(height: 16),
-
-                          // Height & Weight Side-by-Side Row
-                          Row(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Height (Length) Field
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Height',
-                                      style: AppTextStyles.bodyMedium.copyWith(
-                                        fontSize: 13,
-                                        color: isDark ? Colors.white54 : AppColors.textSecondary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    TextFormField(
-                                      controller: _heightController,
-                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                      style: AppTextStyles.bodyMedium.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(context).colorScheme.onSurface,
-                                      ),
-                                      decoration: InputDecoration(
-                                        hintText: '165',
-                                        hintStyle: AppTextStyles.hintStyle.copyWith(
-                                          color: isDark ? Colors.white30 : AppColors.textSecondary.withValues(alpha: 0.5),
-                                        ),
-                                        filled: true,
-                                        fillColor: isDark ? const Color(0xFF2C2C2C) : AppColors.fill,
-                                        prefixIcon: Icon(Icons.height_rounded, color: isDark ? Colors.white54 : AppColors.textSecondary, size: 20),
-                                        suffixText: 'cm',
-                                        suffixStyle: AppTextStyles.bodyMedium.copyWith(
-                                          color: isDark ? Colors.white70 : AppColors.textSecondary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide(
-                                            color: isDark ? Colors.white12 : AppColors.border,
-                                            width: 1,
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(color: AppColors.secondary, width: 1.5),
-                                        ),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.trim().isEmpty) {
-                                          return 'Enter height';
-                                        }
-                                        if (double.tryParse(value) == null) {
-                                          return 'Invalid number';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ],
+                              Text(
+                                'Physical Profile',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
                                 ),
                               ),
-                              const SizedBox(width: 16),
-                              // Weight Field
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Weight',
-                                      style: AppTextStyles.bodyMedium.copyWith(
-                                        fontSize: 13,
-                                        color: isDark ? Colors.white54 : AppColors.textSecondary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    TextFormField(
-                                      controller: _weightController,
-                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                      style: AppTextStyles.bodyMedium.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(context).colorScheme.onSurface,
-                                      ),
-                                      decoration: InputDecoration(
-                                        hintText: '60',
-                                        hintStyle: AppTextStyles.hintStyle.copyWith(
-                                          color: isDark ? Colors.white30 : AppColors.textSecondary.withValues(alpha: 0.5),
+                              Divider(
+                                height: 20,
+                                color: isDark
+                                    ? Colors.white12
+                                    : AppColors.divider,
+                              ),
+
+                              // Gender Selection Box
+                              Text(
+                                'Gender',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  fontSize: 13,
+                                  color: isDark
+                                      ? Colors.white54
+                                      : AppColors.textSecondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  // Female Option
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () =>
+                                          setState(() => _gender = 'Female'),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 250,
                                         ),
-                                        filled: true,
-                                        fillColor: isDark ? const Color(0xFF2C2C2C) : AppColors.fill,
-                                        prefixIcon: Icon(Icons.scale_rounded, color: isDark ? Colors.white54 : AppColors.textSecondary, size: 20),
-                                        suffixText: 'kg',
-                                        suffixStyle: AppTextStyles.bodyMedium.copyWith(
-                                          color: isDark ? Colors.white70 : AppColors.textSecondary,
-                                          fontWeight: FontWeight.bold,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 10,
                                         ),
-                                        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide(
-                                            color: isDark ? Colors.white12 : AppColors.border,
-                                            width: 1,
+                                        decoration: BoxDecoration(
+                                          color: _gender == 'Female'
+                                              ? AppColors.primaryExtraLight
+                                                    .withValues(
+                                                      alpha: isDark
+                                                          ? 0.25
+                                                          : 1.0,
+                                                    )
+                                              : (isDark
+                                                    ? const Color(0xFF2C2C2C)
+                                                    : AppColors.fill),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: _gender == 'Female'
+                                                ? AppColors.secondary
+                                                      .withValues(alpha: 0.5)
+                                                : Colors.transparent,
+                                            width: 1.5,
                                           ),
                                         ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(color: AppColors.secondary, width: 1.5),
+                                        child: Column(
+                                          children: [
+                                            Icon(
+                                              Icons.female_rounded,
+                                              color: _gender == 'Female'
+                                                  ? AppColors.secondary
+                                                  : (isDark
+                                                        ? Colors.white54
+                                                        : AppColors
+                                                              .textSecondary),
+                                              size: 24,
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Female',
+                                              style: AppTextStyles.bodyMedium
+                                                  .copyWith(
+                                                    color: _gender == 'Female'
+                                                        ? AppColors.secondary
+                                                        : (isDark
+                                                              ? Colors.white54
+                                                              : AppColors
+                                                                    .textSecondary),
+                                                    fontWeight:
+                                                        _gender == 'Female'
+                                                        ? FontWeight.bold
+                                                        : FontWeight.w500,
+                                                    fontSize: 12,
+                                                  ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      validator: (value) {
-                                        if (value == null || value.trim().isEmpty) {
-                                          return 'Enter weight';
-                                        }
-                                        if (double.tryParse(value) == null) {
-                                          return 'Invalid number';
-                                        }
-                                        return null;
-                                      },
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  // Male Option
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () =>
+                                          setState(() => _gender = 'Male'),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 250,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: _gender == 'Male'
+                                              ? AppColors.secondaryExtraLight
+                                                    .withValues(
+                                                      alpha: isDark
+                                                          ? 0.25
+                                                          : 1.0,
+                                                    )
+                                              : (isDark
+                                                    ? const Color(0xFF2C2C2C)
+                                                    : AppColors.fill),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: _gender == 'Male'
+                                                ? AppColors.secondary
+                                                      .withValues(alpha: 0.5)
+                                                : Colors.transparent,
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Icon(
+                                              Icons.male_rounded,
+                                              color: _gender == 'Male'
+                                                  ? AppColors.secondary
+                                                  : (isDark
+                                                        ? Colors.white54
+                                                        : AppColors
+                                                              .textSecondary),
+                                              size: 24,
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Male',
+                                              style: AppTextStyles.bodyMedium
+                                                  .copyWith(
+                                                    color: _gender == 'Male'
+                                                        ? AppColors.secondary
+                                                        : (isDark
+                                                              ? Colors.white54
+                                                              : AppColors
+                                                                    .textSecondary),
+                                                    fontWeight:
+                                                        _gender == 'Male'
+                                                        ? FontWeight.bold
+                                                        : FontWeight.w500,
+                                                    fontSize: 12,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Height & Weight Side-by-Side Row
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Height (Length) Field
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Height',
+                                          style: AppTextStyles.bodyMedium
+                                              .copyWith(
+                                                fontSize: 13,
+                                                color: isDark
+                                                    ? Colors.white54
+                                                    : AppColors.textSecondary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        TextFormField(
+                                          controller: _heightController,
+                                          keyboardType:
+                                              const TextInputType.numberWithOptions(
+                                                decimal: true,
+                                              ),
+                                          style: AppTextStyles.bodyMedium
+                                              .copyWith(
+                                                fontWeight: FontWeight.w600,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
+                                              ),
+                                          decoration: InputDecoration(
+                                            hintText: '165',
+                                            hintStyle: AppTextStyles.hintStyle
+                                                .copyWith(
+                                                  color: isDark
+                                                      ? Colors.white30
+                                                      : AppColors.textSecondary
+                                                            .withValues(
+                                                              alpha: 0.5,
+                                                            ),
+                                                ),
+                                            filled: true,
+                                            fillColor: isDark
+                                                ? const Color(0xFF2C2C2C)
+                                                : AppColors.fill,
+                                            prefixIcon: Icon(
+                                              Icons.height_rounded,
+                                              color: isDark
+                                                  ? Colors.white54
+                                                  : AppColors.textSecondary,
+                                              size: 20,
+                                            ),
+                                            suffixText: 'cm',
+                                            suffixStyle: AppTextStyles
+                                                .bodyMedium
+                                                .copyWith(
+                                                  color: isDark
+                                                      ? Colors.white70
+                                                      : AppColors.textSecondary,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  vertical: 10,
+                                                  horizontal: 12,
+                                                ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide(
+                                                color: isDark
+                                                    ? Colors.white12
+                                                    : AppColors.border,
+                                                width: 1,
+                                              ),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: const BorderSide(
+                                                color: AppColors.secondary,
+                                                width: 1.5,
+                                              ),
+                                            ),
+                                          ),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.trim().isEmpty) {
+                                              return 'Enter height';
+                                            }
+                                            if (double.tryParse(value) ==
+                                                null) {
+                                              return 'Invalid number';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  // Weight Field
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Weight',
+                                          style: AppTextStyles.bodyMedium
+                                              .copyWith(
+                                                fontSize: 13,
+                                                color: isDark
+                                                    ? Colors.white54
+                                                    : AppColors.textSecondary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        TextFormField(
+                                          controller: _weightController,
+                                          keyboardType:
+                                              const TextInputType.numberWithOptions(
+                                                decimal: true,
+                                              ),
+                                          style: AppTextStyles.bodyMedium
+                                              .copyWith(
+                                                fontWeight: FontWeight.w600,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
+                                              ),
+                                          decoration: InputDecoration(
+                                            hintText: '60',
+                                            hintStyle: AppTextStyles.hintStyle
+                                                .copyWith(
+                                                  color: isDark
+                                                      ? Colors.white30
+                                                      : AppColors.textSecondary
+                                                            .withValues(
+                                                              alpha: 0.5,
+                                                            ),
+                                                ),
+                                            filled: true,
+                                            fillColor: isDark
+                                                ? const Color(0xFF2C2C2C)
+                                                : AppColors.fill,
+                                            prefixIcon: Icon(
+                                              Icons.scale_rounded,
+                                              color: isDark
+                                                  ? Colors.white54
+                                                  : AppColors.textSecondary,
+                                              size: 20,
+                                            ),
+                                            suffixText: 'kg',
+                                            suffixStyle: AppTextStyles
+                                                .bodyMedium
+                                                .copyWith(
+                                                  color: isDark
+                                                      ? Colors.white70
+                                                      : AppColors.textSecondary,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  vertical: 10,
+                                                  horizontal: 12,
+                                                ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide(
+                                                color: isDark
+                                                    ? Colors.white12
+                                                    : AppColors.border,
+                                                width: 1,
+                                              ),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: const BorderSide(
+                                                color: AppColors.secondary,
+                                                width: 1.5,
+                                              ),
+                                            ),
+                                          ),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.trim().isEmpty) {
+                                              return 'Enter weight';
+                                            }
+                                            if (double.tryParse(value) ==
+                                                null) {
+                                              return 'Invalid number';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ).animate().fade(delay: 150.ms).slideY(begin: 0.08, end: 0, duration: 400.ms),
+                        )
+                        .animate()
+                        .fade(delay: 150.ms)
+                        .slideY(begin: 0.08, end: 0, duration: 400.ms),
+
+                    const SizedBox(height: 20),
+
+                    // Notification Preferences Card
+                    Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF1E1E1E)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: isDark ? Colors.white12 : AppColors.border,
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.textPrimary.withValues(
+                                  alpha: isDark ? 0.01 : 0.04,
+                                ),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Preferences',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
+                              ),
+                              Divider(
+                                height: 20,
+                                color: isDark
+                                    ? Colors.white12
+                                    : AppColors.divider,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.secondary
+                                                .withValues(alpha: 0.1),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.water_drop_rounded,
+                                            color: AppColors.secondary,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Water Reminder',
+                                                style: AppTextStyles.bodyMedium
+                                                    .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Theme.of(
+                                                        context,
+                                                      ).colorScheme.onSurface,
+                                                    ),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                'Remind me to drink water every 3 hours',
+                                                style: AppTextStyles.bodyRegular
+                                                    .copyWith(
+                                                      fontSize: 11,
+                                                      color: isDark
+                                                          ? Colors.white54
+                                                          : AppColors
+                                                                .textSecondary,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Switch.adaptive(
+                                    value: _waterReminderEnabled,
+                                    activeTrackColor: AppColors.secondary,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _waterReminderEnabled = value;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
+                        .animate()
+                        .fade(delay: 200.ms)
+                        .slideY(begin: 0.08, end: 0, duration: 400.ms),
 
                     const SizedBox(height: 24),
 
@@ -756,50 +1081,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     if (_isSaving)
                       const Center(
                         child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondary),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.secondary,
+                          ),
                         ),
                       )
                     else
                       Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              height: 50,
-                              child: AppButton(
-                                text: 'Save Changes',
-                                onPressed: _saveProfileData,
-                                backgroundColor: AppColors.secondary,
-                                borderRadius: 14,
-                                height: 50,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: SizedBox(
-                              height: 50,
-                              child: OutlinedButton.icon(
-                                onPressed: _handleSignOut,
-                                icon: const Icon(Icons.logout_rounded, color: AppColors.secondary, size: 16),
-                                label: Text(
-                                  'Sign Out',
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    color: AppColors.secondary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(color: AppColors.secondary, width: 1.5),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14),
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 50,
+                                  child: AppButton(
+                                    text: 'Save Changes',
+                                    onPressed: _saveProfileData,
+                                    backgroundColor: AppColors.secondary,
+                                    borderRadius: 14,
+                                    height: 50,
                                   ),
                                 ),
                               ),
-                            ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 50,
+                                  child: OutlinedButton.icon(
+                                    onPressed: _handleSignOut,
+                                    icon: const Icon(
+                                      Icons.logout_rounded,
+                                      color: AppColors.secondary,
+                                      size: 16,
+                                    ),
+                                    label: Text(
+                                      'Sign Out',
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        color: AppColors.secondary,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(
+                                        color: AppColors.secondary,
+                                        width: 1.5,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                          .animate()
+                          .fade(delay: 200.ms)
+                          .scale(
+                            begin: const Offset(0.95, 0.95),
+                            end: const Offset(1, 1),
+                            duration: 350.ms,
                           ),
-                        ],
-                      ).animate().fade(delay: 200.ms).scale(begin: const Offset(0.95, 0.95), end: const Offset(1, 1), duration: 350.ms),
 
                     // Padding for bottom nav bar overlay
                     const SizedBox(height: 120),

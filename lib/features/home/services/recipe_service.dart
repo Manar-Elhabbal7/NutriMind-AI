@@ -21,7 +21,11 @@ class Recipe {
     this.isDrink = false,
   });
 
-  factory Recipe.fromJson(Map<String, dynamic> json, String category, {bool isDrink = false}) {
+  factory Recipe.fromJson(
+    Map<String, dynamic> json,
+    String category, {
+    bool isDrink = false,
+  }) {
     List<String> ingredientsList = [];
     if (isDrink) {
       for (int i = 1; i <= 15; i++) {
@@ -50,7 +54,9 @@ class Recipe {
     return Recipe(
       id: isDrink ? (json['idDrink'] ?? '') : (json['idMeal'] ?? ''),
       title: isDrink ? (json['strDrink'] ?? '') : (json['strMeal'] ?? ''),
-      imageUrl: isDrink ? (json['strDrinkThumb'] ?? '') : (json['strMealThumb'] ?? ''),
+      imageUrl: isDrink
+          ? (json['strDrinkThumb'] ?? '')
+          : (json['strMealThumb'] ?? ''),
       category: category,
       ingredients: ingredientsList,
       instructions: json['strInstructions'] ?? '',
@@ -153,7 +159,11 @@ class RecipeService {
         if (response.data != null && response.data['drinks'] != null) {
           final drinks = response.data['drinks'] as List;
           if (drinks.isNotEmpty) {
-            return Recipe.fromJson(drinks.first, recipe.category, isDrink: true);
+            return Recipe.fromJson(
+              drinks.first,
+              recipe.category,
+              isDrink: true,
+            );
           }
         }
       } else {
@@ -163,7 +173,11 @@ class RecipeService {
         if (response.data != null && response.data['meals'] != null) {
           final meals = response.data['meals'] as List;
           if (meals.isNotEmpty) {
-            return Recipe.fromJson(meals.first, recipe.category, isDrink: false);
+            return Recipe.fromJson(
+              meals.first,
+              recipe.category,
+              isDrink: false,
+            );
           }
         }
       }

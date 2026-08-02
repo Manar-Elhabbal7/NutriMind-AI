@@ -11,7 +11,6 @@ class AuthBrandHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-
         _AppTitle(),
         const SizedBox(height: 6),
         Text(

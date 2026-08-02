@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../home/screens/home_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -42,8 +43,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() => _isGoogleLoading = true);
     try {
       final userCredential = await AuthService.instance.signInWithGoogle();
-      if (!mounted || userCredential == null || userCredential.user == null) return;
+      if (!mounted || userCredential == null || userCredential.user == null)
+        return;
 
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('show_onboarding', true);
+
+      if (!mounted) return;
       final user = userCredential.user!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -51,11 +57,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-      if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute<void>(
-          builder: (_) => const HomeScreen(),
-        ),
+        MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
         (route) => false,
       );
     } catch (e) {
@@ -63,13 +66,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       String message = e.toString().split(']').last.trim();
       if (message.toLowerCase().contains('no firebase') ||
           message.toLowerCase().contains('initializ')) {
-        message = 'Authentication service is currently unavailable. Please check your setup.';
+        message =
+            'Authentication service is currently unavailable. Please check your setup.';
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-        ),
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
       );
     } finally {
       if (mounted) setState(() => _isGoogleLoading = false);
@@ -86,6 +87,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
         password: _passwordController.text,
         name: _nameController.text.trim(),
       );
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('show_onboarding', true);
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -99,13 +104,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       String message = e.toString().split(']').last.trim();
       if (message.toLowerCase().contains('no firebase') ||
           message.toLowerCase().contains('initializ')) {
-        message = 'Authentication service is currently unavailable. Please check your setup.';
+        message =
+            'Authentication service is currently unavailable. Please check your setup.';
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-        ),
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

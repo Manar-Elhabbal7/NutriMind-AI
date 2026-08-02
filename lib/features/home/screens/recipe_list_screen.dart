@@ -25,7 +25,9 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
 
   void _loadData() {
     setState(() {
-      _recipesFuture = RecipeService.instance.fetchRecipesByCategory(widget.category);
+      _recipesFuture = RecipeService.instance.fetchRecipesByCategory(
+        widget.category,
+      );
     });
     _loadStarredStatus();
   }
@@ -99,7 +101,9 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
               );
             }
 
-            if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+            if (snapshot.hasError ||
+                !snapshot.hasData ||
+                snapshot.data!.isEmpty) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -113,7 +117,9 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                     Text(
                       "No recipes found for ${widget.category}",
                       style: GoogleFonts.poppins(
-                        color: isDark ? Colors.white70 : AppColors.textSecondary,
+                        color: isDark
+                            ? Colors.white70
+                            : AppColors.textSecondary,
                         fontSize: 16,
                       ),
                     ),
@@ -147,115 +153,138 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                 final isStarred = _starredIds.contains(recipe.id);
 
                 return GestureDetector(
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RecipeDetailScreen(recipe: recipe),
-                      ),
-                    );
-                    _loadStarredStatus();
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                RecipeDetailScreen(recipe: recipe),
+                          ),
+                        );
+                        _loadStarredStatus();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(
+                                alpha: isDark ? 0.3 : 0.08,
+                              ),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Stack(
-                        children: [
-                          // Background Image
-                          Positioned.fill(
-                            child: Image.network(
-                              recipe.imageUrl,
-                              fit: BoxFit.cover,
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Container(
-                                  color: isDark ? Colors.white12 : AppColors.fill,
-                                  child: const Center(
-                                    child: SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          AppColors.secondary,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Stack(
+                            children: [
+                              // Background Image
+                              Positioned.fill(
+                                child: Image.network(
+                                  recipe.imageUrl,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child;
+                                        return Container(
+                                          color: isDark
+                                              ? Colors.white12
+                                              : AppColors.fill,
+                                          child: const Center(
+                                            child: SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(AppColors.secondary),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                        color: isDark
+                                            ? Colors.white12
+                                            : AppColors.fill,
+                                        child: const Icon(
+                                          Icons.broken_image_rounded,
+                                          color: AppColors.secondary,
                                         ),
                                       ),
+                                ),
+                              ),
+                              // Dark Gradient Overlay for readability
+                              Positioned.fill(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black.withValues(alpha: 0.75),
+                                      ],
                                     ),
                                   ),
-                                );
-                              },
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                color: isDark ? Colors.white12 : AppColors.fill,
-                                child: const Icon(Icons.broken_image_rounded, color: AppColors.secondary),
-                              ),
-                            ),
-                          ),
-                          // Dark Gradient Overlay for readability
-                          Positioned.fill(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.transparent,
-                                    Colors.black.withValues(alpha: 0.75),
-                                  ],
                                 ),
                               ),
-                            ),
-                          ),
-                          // Recipe Title
-                          Positioned(
-                            bottom: 8,
-                            left: 10,
-                            right: 10,
-                            child: Text(
-                              recipe.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          // Star Button
-                          Positioned(
-                            top: 6,
-                            right: 6,
-                            child: GestureDetector(
-                              onTap: () => _toggleStar(recipe),
-                              child: Container(
-                                padding: const EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.5),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  isStarred ? Icons.star_rounded : Icons.star_border_rounded,
-                                  color: isStarred ? Colors.amber : Colors.white,
-                                  size: 16,
+                              // Recipe Title
+                              Positioned(
+                                bottom: 8,
+                                left: 10,
+                                right: 10,
+                                child: Text(
+                                  recipe.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                            ),
+                              // Star Button
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: GestureDetector(
+                                  onTap: () => _toggleStar(recipe),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      isStarred
+                                          ? Icons.star_rounded
+                                          : Icons.star_border_rounded,
+                                      color: isStarred
+                                          ? Colors.amber
+                                          : Colors.white,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                ).animate().fade(delay: (index * 50).ms).slideY(begin: 0.1, end: 0);
+                    )
+                    .animate()
+                    .fade(delay: (index * 50).ms)
+                    .slideY(begin: 0.1, end: 0);
               },
             );
           },
