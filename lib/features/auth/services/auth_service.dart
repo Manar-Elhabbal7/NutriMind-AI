@@ -9,10 +9,10 @@ class AuthService {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// Set your Google OAuth web client ID here for Chrome/web builds.
   static const String webClientId = String.fromEnvironment(
     'GOOGLE_WEB_CLIENT_ID',
-    defaultValue: '563646488257-f9cssid1l71s3l8elrn18g24p7sevs86.apps.googleusercontent.com',
+    defaultValue:
+        '563646488257-f9cssid1l71s3l8elrn18g24p7sevs86.apps.googleusercontent.com',
   );
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -20,7 +20,6 @@ class AuthService {
     scopes: ['email', 'profile'],
   );
 
-  /// Get active user state
   Stream<User?> get authStateChanges => _auth.authStateChanges();
   User? get currentUser => _auth.currentUser;
 
@@ -51,21 +50,17 @@ class AuthService {
 
   /// Sign In with Google
   Future<UserCredential?> signInWithGoogle() async {
-    // Trigger Google Sign-In flow (compatible with Web and Mobile)
     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
     if (googleUser == null) return null;
 
-    // Obtain auth details from the request
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
 
-    // Create a new credential
     final OAuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
-    // Sign in to Firebase with the credential
     return await _auth.signInWithCredential(credential);
   }
 

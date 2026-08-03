@@ -18,7 +18,7 @@ class AuthButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.secondary, // Solid Purple (AI color from palette)
+        color: AppColors.secondary,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(

@@ -160,7 +160,10 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
 
     // Call Gemini API
     try {
-      const String apiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: 'YOUR_API_KEY');
+      const String apiKey = String.fromEnvironment(
+        'GEMINI_API_KEY',
+        defaultValue: 'YOUR_API_KEY',
+      );
       final response = await _dio.post(
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$apiKey',
         data: {
@@ -820,5 +823,3 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
     );
   }
 }
-
-

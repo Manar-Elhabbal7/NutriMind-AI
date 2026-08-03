@@ -3,7 +3,9 @@ import 'package:nutri_mind/main.dart';
 import 'package:nutri_mind/features/splash/splash_view.dart';
 
 void main() {
-  testWidgets('App launches and displays SplashView', (WidgetTester tester) async {
+  testWidgets('App launches and displays SplashView', (
+    WidgetTester tester,
+  ) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
 

@@ -19,10 +19,10 @@ class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
     super.initState();
-    _navigateToNextScreen();
+    _navigatToLoginScreen();
   }
 
-  void _navigateToNextScreen() {
+  void _navigatToLoginScreen() {
     _navigateTimer = Timer(const Duration(seconds: 3), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(

@@ -13,11 +13,14 @@ class ScanResultDetailsSheet extends StatefulWidget {
   final XFile photo;
   final Dio dio;
 
-  const ScanResultDetailsSheet({super.key, required this.photo, required this.dio});
+  const ScanResultDetailsSheet({
+    super.key,
+    required this.photo,
+    required this.dio,
+  });
 
   @override
-  State<ScanResultDetailsSheet> createState() =>
-      _ScanResultDetailsSheetState();
+  State<ScanResultDetailsSheet> createState() => _ScanResultDetailsSheetState();
 }
 
 class _ScanResultDetailsSheetState extends State<ScanResultDetailsSheet> {
@@ -55,7 +58,10 @@ class _ScanResultDetailsSheetState extends State<ScanResultDetailsSheet> {
           "METRICS: Name=FOOD_NAME, Calories=CALORIES_VAL, Carbs=CARBS_VAL, Protein=PROTEIN_VAL, Fats=FATS_VAL "
           "Where FOOD_NAME is the food item name, and CALORIES_VAL, CARBS_VAL, PROTEIN_VAL, FATS_VAL are numeric values like '150 kcal', '20g', '12g', '5g'.";
 
-      const String apiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: 'YOUR_API_KEY');
+      const String apiKey = String.fromEnvironment(
+        'GEMINI_API_KEY',
+        defaultValue: 'YOUR_API_KEY',
+      );
       final response = await widget.dio.post(
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$apiKey',
         data: {

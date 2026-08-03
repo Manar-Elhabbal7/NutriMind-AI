@@ -40,8 +40,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = false;
   bool _isSaving = false;
 
-
-
   @override
   void initState() {
     super.initState();
@@ -75,26 +73,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (user != null) {
         try {
-          final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+          final doc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
           if (doc.exists && doc.data() != null) {
             final data = doc.data()!;
             setState(() {
-              if (data['displayName'] != null && data['displayName'].toString().trim().isNotEmpty) {
+              if (data['displayName'] != null &&
+                  data['displayName'].toString().trim().isNotEmpty) {
                 _nameController.text = data['displayName'].toString();
               }
-              if (data['gender'] != null && data['gender'].toString().trim().isNotEmpty) {
+              if (data['gender'] != null &&
+                  data['gender'].toString().trim().isNotEmpty) {
                 _gender = data['gender'].toString();
               }
-              if (data['height'] != null && data['height'].toString().trim().isNotEmpty) {
+              if (data['height'] != null &&
+                  data['height'].toString().trim().isNotEmpty) {
                 _heightController.text = data['height'].toString();
               }
-              if (data['weight'] != null && data['weight'].toString().trim().isNotEmpty) {
+              if (data['weight'] != null &&
+                  data['weight'].toString().trim().isNotEmpty) {
                 _weightController.text = data['weight'].toString();
               }
-              if (data['profilePhoto'] != null && data['profilePhoto'].toString().trim().isNotEmpty) {
+              if (data['profilePhoto'] != null &&
+                  data['profilePhoto'].toString().trim().isNotEmpty) {
                 _profilePhotoPath = data['profilePhoto'].toString();
               }
-              if (data['bannerPhoto'] != null && data['bannerPhoto'].toString().trim().isNotEmpty) {
+              if (data['bannerPhoto'] != null &&
+                  data['bannerPhoto'].toString().trim().isNotEmpty) {
                 _bannerPhotoPath = data['bannerPhoto'].toString();
               }
               if (data['waterReminderEnabled'] != null) {
@@ -104,16 +111,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
             loadedFromFirestore = true;
 
             // Cache to SharedPreferences
-            await prefs.setString('profile_display_name', _nameController.text.trim());
+            await prefs.setString(
+              'profile_display_name',
+              _nameController.text.trim(),
+            );
             await prefs.setString('profile_gender', _gender);
-            await prefs.setString('profile_height', _heightController.text.trim());
-            await prefs.setString('profile_weight', _weightController.text.trim());
+            await prefs.setString(
+              'profile_height',
+              _heightController.text.trim(),
+            );
+            await prefs.setString(
+              'profile_weight',
+              _weightController.text.trim(),
+            );
             await prefs.setString('profile_photo_path', _profilePhotoPath);
             await prefs.setString('profile_banner_path', _bannerPhotoPath);
-            await prefs.setBool('water_reminder_enabled', _waterReminderEnabled);
+            await prefs.setBool(
+              'water_reminder_enabled',
+              _waterReminderEnabled,
+            );
           }
         } catch (firestoreError) {
-          debugPrint('Error loading from Firestore, falling back to local storage: $firestoreError');
+          debugPrint(
+            'Error loading from Firestore, falling back to local storage: $firestoreError',
+          );
         }
       }
 
@@ -121,7 +142,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           // Load display name from local prefs if Firebase display name is empty
           if (_nameController.text.isEmpty) {
-            _nameController.text = prefs.getString('profile_display_name') ?? '';
+            _nameController.text =
+                prefs.getString('profile_display_name') ?? '';
           }
 
           // Load other physical metrics
@@ -133,7 +155,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _profilePhotoPath =
               prefs.getString('profile_photo_path') ?? _profilePhotoPath;
           _bannerPhotoPath = prefs.getString('profile_banner_path') ?? '';
-          _waterReminderEnabled = prefs.getBool('water_reminder_enabled') ?? true;
+          _waterReminderEnabled =
+              prefs.getBool('water_reminder_enabled') ?? true;
         });
       }
     } catch (e) {
@@ -173,15 +196,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final List<Future<void>> saveTasks = [];
 
       // Concurrently save to SharedPreferences
-      saveTasks.add(Future.wait([
-        prefs.setString('profile_display_name', _nameController.text.trim()),
-        prefs.setString('profile_gender', _gender),
-        prefs.setString('profile_height', _heightController.text.trim()),
-        prefs.setString('profile_weight', _weightController.text.trim()),
-        prefs.setString('profile_photo_path', _profilePhotoPath),
-        prefs.setString('profile_banner_path', _bannerPhotoPath),
-        prefs.setBool('water_reminder_enabled', _waterReminderEnabled),
-      ]));
+      saveTasks.add(
+        Future.wait([
+          prefs.setString('profile_display_name', _nameController.text.trim()),
+          prefs.setString('profile_gender', _gender),
+          prefs.setString('profile_height', _heightController.text.trim()),
+          prefs.setString('profile_weight', _weightController.text.trim()),
+          prefs.setString('profile_photo_path', _profilePhotoPath),
+          prefs.setString('profile_banner_path', _bannerPhotoPath),
+          prefs.setBool('water_reminder_enabled', _waterReminderEnabled),
+        ]),
+      );
 
       // Concurrently handle water reminder scheduling
       if (_waterReminderEnabled) {
@@ -196,18 +221,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final List<Future<void>> dbAndAuthTasks = [
           () async {
             try {
-              await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-                'displayName': _nameController.text.trim(),
-                'gender': _gender,
-                'height': _heightController.text.trim(),
-                'weight': _weightController.text.trim(),
-                'profilePhoto': _profilePhotoPath,
-                'bannerPhoto': _bannerPhotoPath,
-                'waterReminderEnabled': _waterReminderEnabled,
-                'updatedAt': FieldValue.serverTimestamp(),
-              }, SetOptions(merge: true));
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user.uid)
+                  .set({
+                    'displayName': _nameController.text.trim(),
+                    'gender': _gender,
+                    'height': _heightController.text.trim(),
+                    'weight': _weightController.text.trim(),
+                    'profilePhoto': _profilePhotoPath,
+                    'bannerPhoto': _bannerPhotoPath,
+                    'waterReminderEnabled': _waterReminderEnabled,
+                    'updatedAt': FieldValue.serverTimestamp(),
+                  }, SetOptions(merge: true));
             } catch (firestoreError) {
-              debugPrint('Firestore save failed (falling back to local-only cache): $firestoreError');
+              debugPrint(
+                'Firestore save failed (falling back to local-only cache): $firestoreError',
+              );
             }
           }(),
           user.updateDisplayName(_nameController.text.trim()),

@@ -340,23 +340,26 @@ class _HomeScreenState extends State<HomeScreen> {
           .collection('users')
           .doc(user.uid)
           .snapshots()
-          .listen((snapshot) {
-        if (snapshot.exists && snapshot.data() != null) {
-          final data = snapshot.data()!;
-          if (mounted) {
-            setState(() {
-              if (data['displayName'] != null) {
-                _displayName = data['displayName'];
+          .listen(
+            (snapshot) {
+              if (snapshot.exists && snapshot.data() != null) {
+                final data = snapshot.data()!;
+                if (mounted) {
+                  setState(() {
+                    if (data['displayName'] != null) {
+                      _displayName = data['displayName'];
+                    }
+                    if (data['profilePhoto'] != null) {
+                      _profilePhotoPath = data['profilePhoto'];
+                    }
+                  });
+                }
               }
-              if (data['profilePhoto'] != null) {
-                _profilePhotoPath = data['profilePhoto'];
-              }
-            });
-          }
-        }
-      }, onError: (e) {
-        debugPrint('Error listening to user doc: $e');
-      });
+            },
+            onError: (e) {
+              debugPrint('Error listening to user doc: $e');
+            },
+          );
     }
   }
 
@@ -647,5 +650,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-

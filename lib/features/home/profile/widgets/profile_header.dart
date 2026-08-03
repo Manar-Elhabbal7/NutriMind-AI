@@ -19,7 +19,8 @@ class ProfileHeader extends StatelessWidget {
   });
 
   static const String _defaultProfilePhoto = 'assets/images/girl.png';
-  static const String _defaultBannerPhoto = 'assets/images/profile_background1.jpeg';
+  static const String _defaultBannerPhoto =
+      'assets/images/profile_background1.jpeg';
 
   ImageProvider _buildImageProvider(String path, bool isProfile) {
     if (path.isEmpty) {
@@ -32,7 +33,9 @@ class ProfileHeader extends StatelessWidget {
         return MemoryImage(base64Decode(base64String));
       } catch (e) {
         debugPrint('Error decoding base64 image: $e');
-        return AssetImage(isProfile ? _defaultProfilePhoto : _defaultBannerPhoto);
+        return AssetImage(
+          isProfile ? _defaultProfilePhoto : _defaultBannerPhoto,
+        );
       }
     }
 
@@ -53,7 +56,6 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return SizedBox(
       height: 185,
       child: Stack(
@@ -144,10 +146,7 @@ class ProfileHeader extends StatelessWidget {
                         ),
                       ],
                       image: DecorationImage(
-                        image: _buildImageProvider(
-                          profilePhotoPath,
-                          true,
-                        ),
+                        image: _buildImageProvider(profilePhotoPath, true),
                         fit: BoxFit.cover,
                       ),
                     ),

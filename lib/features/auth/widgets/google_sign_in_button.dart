@@ -73,67 +73,11 @@ class _GoogleLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Image.asset(
+      'assets/images/google_icon.png',
       width: size,
       height: size,
-      child: CustomPaint(painter: _GoogleLogoPainter()),
+      fit: BoxFit.contain,
     );
   }
-}
-
-class _GoogleLogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
-
-    // Standard Google logo brand colors (must remain exact standard brand colors)
-    final bluePaint = Paint()..color = const Color(0xFF4285F4);
-    final greenPaint = Paint()..color = const Color(0xFF34A853);
-    final yellowPaint = Paint()..color = const Color(0xFFFBBC05);
-    final redPaint = Paint()..color = const Color(0xFFEA4335);
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -0.45,
-      1.8,
-      true,
-      bluePaint,
-    );
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      1.35,
-      1.0,
-      true,
-      greenPaint,
-    );
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      2.35,
-      0.9,
-      true,
-      yellowPaint,
-    );
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      3.25,
-      0.95,
-      true,
-      redPaint,
-    );
-
-    canvas.drawCircle(center, radius * 0.58, Paint()..color = Colors.white);
-    canvas.drawRect(
-      Rect.fromLTWH(
-        center.dx,
-        center.dy - radius * 0.18,
-        radius,
-        radius * 0.36,
-      ),
-      bluePaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
