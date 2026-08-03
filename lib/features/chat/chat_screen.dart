@@ -135,7 +135,6 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
       text: text,
       isUser: true,
       timestamp: DateTime.now(),
-      type: MessageType.text,
     );
 
     setState(() {
@@ -209,7 +208,6 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
             text: botReply,
             isUser: false,
             timestamp: DateTime.now(),
-            type: MessageType.text,
           ),
         );
       });
@@ -227,7 +225,6 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
             text: errorMessage,
             isUser: false,
             timestamp: DateTime.now(),
-            type: MessageType.text,
           ),
         );
       });
@@ -238,7 +235,6 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
             text: "An unexpected error occurred: $e",
             isUser: false,
             timestamp: DateTime.now(),
-            type: MessageType.text,
           ),
         );
       });
