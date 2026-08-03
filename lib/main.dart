@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/theme/app_colors.dart';
@@ -6,19 +7,38 @@ import 'features/home/services/notification_service.dart';
 
 import 'package:flutter/foundation.dart';
 
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  const MyCustomScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+      };
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.instance.init();
   await NotificationService.instance.scheduleWaterReminders();
   try {
     if (kIsWeb) {
+      const webAppId = String.fromEnvironment(
+        'FIREBASE_WEB_APP_ID',
+        defaultValue: '1:563646488257:web:23beedffebc4ca336cbe40',
+      );
       await Firebase.initializeApp(
         options: const FirebaseOptions(
-          apiKey: 'AIzaSyANN9QwWbgRz1b-N7eEHNoMek0EdBAlr-w',
-          appId: '1:563646488257:android:80301046032e74206cbe40',
+          apiKey: String.fromEnvironment(
+            'FIREBASE_API_KEY',
+            defaultValue: 'AIzaSyDZRdM_B2duZ1kPhH7PGGZWUwWbjq1sLBY',
+          ),
+          appId: webAppId,
           messagingSenderId: '563646488257',
           projectId: 'nutrimind-ec817',
           storageBucket: 'nutrimind-ec817.firebasestorage.app',
+          measurementId: 'G-WMKWGCG936',
         ),
       );
     } else {
@@ -26,13 +46,23 @@ void main() async {
     }
   } catch (e) {
     try {
+      if (kIsWeb) {
+        rethrow;
+      }
+      // Platform-specific fallback options on Mobile
+      final isAndroid = defaultTargetPlatform == TargetPlatform.android;
       await Firebase.initializeApp(
-        options: const FirebaseOptions(
-          apiKey: 'AIzaSyANN9QwWbgRz1b-N7eEHNoMek0EdBAlr-w',
-          appId: '1:563646488257:android:80301046032e74206cbe40',
+        options: FirebaseOptions(
+          apiKey: isAndroid
+              ? 'AIzaSyANN9QwWbgRz1b-N7eEHNoMek0EdBAlr-w'
+              : 'AIzaSyBiL7q6cgy5iiZg5lPXjzS6fm6eAZIL_r8',
+          appId: isAndroid
+              ? '1:563646488257:android:80301046032e74206cbe40'
+              : '1:563646488257:ios:90446bbdb14a53f86cbe40',
           messagingSenderId: '563646488257',
           projectId: 'nutrimind-ec817',
           storageBucket: 'nutrimind-ec817.firebasestorage.app',
+          iosBundleId: isAndroid ? null : 'com.example.nutriMind',
         ),
       );
     } catch (e2) {
@@ -58,6 +88,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'NutriMind AI',
           debugShowCheckedModeBanner: false,
+          scrollBehavior: const MyCustomScrollBehavior(),
           themeMode: currentMode,
           theme: ThemeData(
             useMaterial3: true,

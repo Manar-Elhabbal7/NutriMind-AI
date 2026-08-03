@@ -63,6 +63,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         (route) => false,
       );
     } catch (e) {
+      debugPrint('Google Sign-In error: $e');
       if (!mounted) return;
       String message = e.toString().split(']').last.trim();
       if (message.toLowerCase().contains('no firebase') ||

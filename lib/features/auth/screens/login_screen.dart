@@ -61,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
       );
     } catch (e) {
+      debugPrint('Google Sign-In error: $e');
       if (!mounted) return;
       String message = e.toString().split(']').last.trim();
       if (message.toLowerCase().contains('no firebase') ||

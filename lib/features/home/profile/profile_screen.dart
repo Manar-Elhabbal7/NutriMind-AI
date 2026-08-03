@@ -29,6 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
+  final _scrollController = ScrollController();
 
   // State variables
   String _email = '';
@@ -52,6 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _nameController.dispose();
     _heightController.dispose();
     _weightController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -77,13 +79,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (doc.exists && doc.data() != null) {
             final data = doc.data()!;
             setState(() {
-              _nameController.text = data['displayName'] ?? _nameController.text;
-              _gender = data['gender'] ?? 'Female';
-              _heightController.text = data['height'] ?? '';
-              _weightController.text = data['weight'] ?? '';
-              _profilePhotoPath = data['profilePhoto'] ?? _profilePhotoPath;
-              _bannerPhotoPath = data['bannerPhoto'] ?? '';
-              _waterReminderEnabled = data['waterReminderEnabled'] ?? true;
+              if (data['displayName'] != null && data['displayName'].toString().trim().isNotEmpty) {
+                _nameController.text = data['displayName'].toString();
+              }
+              if (data['gender'] != null && data['gender'].toString().trim().isNotEmpty) {
+                _gender = data['gender'].toString();
+              }
+              if (data['height'] != null && data['height'].toString().trim().isNotEmpty) {
+                _heightController.text = data['height'].toString();
+              }
+              if (data['weight'] != null && data['weight'].toString().trim().isNotEmpty) {
+                _weightController.text = data['weight'].toString();
+              }
+              if (data['profilePhoto'] != null && data['profilePhoto'].toString().trim().isNotEmpty) {
+                _profilePhotoPath = data['profilePhoto'].toString();
+              }
+              if (data['bannerPhoto'] != null && data['bannerPhoto'].toString().trim().isNotEmpty) {
+                _bannerPhotoPath = data['bannerPhoto'].toString();
+              }
+              if (data['waterReminderEnabled'] != null) {
+                _waterReminderEnabled = data['waterReminderEnabled'] as bool;
+              }
             });
             loadedFromFirestore = true;
 
@@ -178,16 +194,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final user = AuthService.instance.currentUser;
       if (user != null) {
         final List<Future<void>> dbAndAuthTasks = [
-          FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-            'displayName': _nameController.text.trim(),
-            'gender': _gender,
-            'height': _heightController.text.trim(),
-            'weight': _weightController.text.trim(),
-            'profilePhoto': _profilePhotoPath,
-            'bannerPhoto': _bannerPhotoPath,
-            'waterReminderEnabled': _waterReminderEnabled,
-            'updatedAt': FieldValue.serverTimestamp(),
-          }, SetOptions(merge: true)),
+          () async {
+            try {
+              await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+                'displayName': _nameController.text.trim(),
+                'gender': _gender,
+                'height': _heightController.text.trim(),
+                'weight': _weightController.text.trim(),
+                'profilePhoto': _profilePhotoPath,
+                'bannerPhoto': _bannerPhotoPath,
+                'waterReminderEnabled': _waterReminderEnabled,
+                'updatedAt': FieldValue.serverTimestamp(),
+              }, SetOptions(merge: true));
+            } catch (firestoreError) {
+              debugPrint('Firestore save failed (falling back to local-only cache): $firestoreError');
+            }
+          }(),
           user.updateDisplayName(_nameController.text.trim()),
         ];
 
@@ -297,9 +319,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final XFile? pickedFile = await picker.pickImage(
         source: source,
-        maxWidth: 500,
-        maxHeight: 500,
-        imageQuality: 85,
+        maxWidth: 150,
+        maxHeight: 150,
+        imageQuality: 50,
       );
       if (pickedFile != null) {
         final bytes = await pickedFile.readAsBytes();
@@ -331,9 +353,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final XFile? pickedFile = await picker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 1200,
-        maxHeight: 600,
-        imageQuality: 85,
+        maxWidth: 500,
+        maxHeight: 250,
+        imageQuality: 50,
       );
       if (pickedFile != null) {
         final bytes = await pickedFile.readAsBytes();
@@ -383,6 +405,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           children: [
             // 1. Header: Banner & Profile Image
@@ -497,7 +521,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
 
                     // Padding for bottom nav bar overlay
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 110),
                   ],
                 ),
               ),

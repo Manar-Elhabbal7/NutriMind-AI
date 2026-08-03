@@ -12,7 +12,7 @@ class AuthService {
   /// Set your Google OAuth web client ID here for Chrome/web builds.
   static const String webClientId = String.fromEnvironment(
     'GOOGLE_WEB_CLIENT_ID',
-    defaultValue: '',
+    defaultValue: '563646488257-f9cssid1l71s3l8elrn18g24p7sevs86.apps.googleusercontent.com',
   );
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -51,12 +51,7 @@ class AuthService {
 
   /// Sign In with Google
   Future<UserCredential?> signInWithGoogle() async {
-    if (kIsWeb) {
-      final GoogleAuthProvider authProvider = GoogleAuthProvider();
-      return await _auth.signInWithPopup(authProvider);
-    }
-
-    // Trigger Google Sign-In flow for Mobile
+    // Trigger Google Sign-In flow (compatible with Web and Mobile)
     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
     if (googleUser == null) return null;
 
