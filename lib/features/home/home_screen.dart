@@ -1,6 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../chat/chat_screen.dart';
@@ -38,16 +41,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int? _tutorialStep;
   OverlayEntry? _tutorialOverlayEntry;
+  StreamSubscription? _userSubscription;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _setupUserListener();
     _checkOnboarding();
   }
 
   @override
   void dispose() {
+    _userSubscription?.cancel();
     _hideTutorialOverlay();
     super.dispose();
   }
@@ -321,12 +326,36 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _loadUserData() {
+  void _setupUserListener() {
+    _userSubscription?.cancel();
     final user = AuthService.instance.currentUser;
     if (user != null) {
+      // Set initial values from Firebase Auth
       setState(() {
         _displayName = user.displayName ?? 'User';
         _profilePhotoPath = user.photoURL ?? '';
+      });
+
+      _userSubscription = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots()
+          .listen((snapshot) {
+        if (snapshot.exists && snapshot.data() != null) {
+          final data = snapshot.data()!;
+          if (mounted) {
+            setState(() {
+              if (data['displayName'] != null) {
+                _displayName = data['displayName'];
+              }
+              if (data['profilePhoto'] != null) {
+                _profilePhotoPath = data['profilePhoto'];
+              }
+            });
+          }
+        }
+      }, onError: (e) {
+        debugPrint('Error listening to user doc: $e');
       });
     }
   }
@@ -334,6 +363,15 @@ class _HomeScreenState extends State<HomeScreen> {
   ImageProvider _buildImageProvider(String path) {
     if (path.isEmpty) {
       return const AssetImage('assets/images/girl.png');
+    }
+    if (path.startsWith('data:image/') || path.contains(';base64,')) {
+      final base64String = path.contains(',') ? path.split(',').last : path;
+      try {
+        return MemoryImage(base64Decode(base64String));
+      } catch (e) {
+        debugPrint('Error decoding base64 image: $e');
+        return const AssetImage('assets/images/girl.png');
+      }
     }
     if (path.startsWith('assets/')) {
       return AssetImage(path);
@@ -554,7 +592,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _currentIndex = index;
             if (index == 0) {
-              _loadUserData();
+              _setupUserListener();
             }
           });
         },

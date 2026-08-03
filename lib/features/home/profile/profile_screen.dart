@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../auth/services/auth_service.dart';
@@ -53,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  /// Load profile data from SharedPreferences and Firebase Auth
+  /// Load profile data from Cloud Firestore, SharedPreferences and Firebase Auth
   Future<void> _loadProfileData() async {
     setState(() => _isLoading = true);
     try {
@@ -67,23 +69,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
 
       final prefs = await SharedPreferences.getInstance();
-      setState(() {
-        // Load display name from local prefs if Firebase display name is empty
-        if (_nameController.text.isEmpty) {
-          _nameController.text = prefs.getString('profile_display_name') ?? '';
+      bool loadedFromFirestore = false;
+
+      if (user != null) {
+        try {
+          final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+          if (doc.exists && doc.data() != null) {
+            final data = doc.data()!;
+            setState(() {
+              _nameController.text = data['displayName'] ?? _nameController.text;
+              _gender = data['gender'] ?? 'Female';
+              _heightController.text = data['height'] ?? '';
+              _weightController.text = data['weight'] ?? '';
+              _profilePhotoPath = data['profilePhoto'] ?? _profilePhotoPath;
+              _bannerPhotoPath = data['bannerPhoto'] ?? '';
+              _waterReminderEnabled = data['waterReminderEnabled'] ?? true;
+            });
+            loadedFromFirestore = true;
+
+            // Cache to SharedPreferences
+            await prefs.setString('profile_display_name', _nameController.text.trim());
+            await prefs.setString('profile_gender', _gender);
+            await prefs.setString('profile_height', _heightController.text.trim());
+            await prefs.setString('profile_weight', _weightController.text.trim());
+            await prefs.setString('profile_photo_path', _profilePhotoPath);
+            await prefs.setString('profile_banner_path', _bannerPhotoPath);
+            await prefs.setBool('water_reminder_enabled', _waterReminderEnabled);
+          }
+        } catch (firestoreError) {
+          debugPrint('Error loading from Firestore, falling back to local storage: $firestoreError');
         }
+      }
 
-        // Load other physical metrics
-        _gender = prefs.getString('profile_gender') ?? 'Female';
-        _heightController.text = prefs.getString('profile_height') ?? '';
-        _weightController.text = prefs.getString('profile_weight') ?? '';
+      if (!loadedFromFirestore) {
+        setState(() {
+          // Load display name from local prefs if Firebase display name is empty
+          if (_nameController.text.isEmpty) {
+            _nameController.text = prefs.getString('profile_display_name') ?? '';
+          }
 
-        // Load photo paths
-        _profilePhotoPath =
-            prefs.getString('profile_photo_path') ?? _profilePhotoPath;
-        _bannerPhotoPath = prefs.getString('profile_banner_path') ?? '';
-        _waterReminderEnabled = prefs.getBool('water_reminder_enabled') ?? true;
-      });
+          // Load other physical metrics
+          _gender = prefs.getString('profile_gender') ?? 'Female';
+          _heightController.text = prefs.getString('profile_height') ?? '';
+          _weightController.text = prefs.getString('profile_weight') ?? '';
+
+          // Load photo paths
+          _profilePhotoPath =
+              prefs.getString('profile_photo_path') ?? _profilePhotoPath;
+          _bannerPhotoPath = prefs.getString('profile_banner_path') ?? '';
+          _waterReminderEnabled = prefs.getBool('water_reminder_enabled') ?? true;
+        });
+      }
     } catch (e) {
       debugPrint('Error loading profile data: $e');
     } finally {
@@ -91,7 +127,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  /// Save profile data to SharedPreferences and Firebase Auth
   Future<void> _saveProfileData() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -101,21 +136,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
 
-      // Save local metrics
-      await prefs.setString(
-        'profile_display_name',
-        _nameController.text.trim(),
-      );
-      await prefs.setString('profile_gender', _gender);
-      await prefs.setString('profile_height', _heightController.text.trim());
-      await prefs.setString('profile_weight', _weightController.text.trim());
-      await prefs.setString('profile_photo_path', _profilePhotoPath);
-      await prefs.setString('profile_banner_path', _bannerPhotoPath);
-      await prefs.setBool('water_reminder_enabled', _waterReminderEnabled);
-
       // Handle water reminder scheduling & permissions
+      bool granted = true;
       if (_waterReminderEnabled) {
-        final granted = await NotificationService.instance.requestPermissions();
+        granted = await NotificationService.instance.requestPermissions();
         if (!granted && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -128,25 +152,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           );
         }
-        await NotificationService.instance.scheduleWaterReminders();
-      } else {
-        await NotificationService.instance.cancelAllNotifications();
       }
 
-      // Save display name and photoURL in Firebase Auth
+      final List<Future<void>> saveTasks = [];
+
+      // Concurrently save to SharedPreferences
+      saveTasks.add(Future.wait([
+        prefs.setString('profile_display_name', _nameController.text.trim()),
+        prefs.setString('profile_gender', _gender),
+        prefs.setString('profile_height', _heightController.text.trim()),
+        prefs.setString('profile_weight', _weightController.text.trim()),
+        prefs.setString('profile_photo_path', _profilePhotoPath),
+        prefs.setString('profile_banner_path', _bannerPhotoPath),
+        prefs.setBool('water_reminder_enabled', _waterReminderEnabled),
+      ]));
+
+      // Concurrently handle water reminder scheduling
+      if (_waterReminderEnabled) {
+        saveTasks.add(NotificationService.instance.scheduleWaterReminders());
+      } else {
+        saveTasks.add(NotificationService.instance.cancelAllNotifications());
+      }
+
+      // Concurrently save to Firebase Firestore and Auth
       final user = AuthService.instance.currentUser;
       if (user != null) {
-        await user.updateDisplayName(_nameController.text.trim());
+        final List<Future<void>> dbAndAuthTasks = [
+          FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+            'displayName': _nameController.text.trim(),
+            'gender': _gender,
+            'height': _heightController.text.trim(),
+            'weight': _weightController.text.trim(),
+            'profilePhoto': _profilePhotoPath,
+            'bannerPhoto': _bannerPhotoPath,
+            'waterReminderEnabled': _waterReminderEnabled,
+            'updatedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true)),
+          user.updateDisplayName(_nameController.text.trim()),
+        ];
+
         if (_profilePhotoPath.isNotEmpty &&
-            !_profilePhotoPath.startsWith('assets/')) {
-          try {
-            await user.updatePhotoURL(_profilePhotoPath);
-          } catch (e) {
-            debugPrint('Failed to update photo URL in Firebase Auth: $e');
-          }
+            !_profilePhotoPath.startsWith('assets/') &&
+            !_profilePhotoPath.startsWith('data:image/') &&
+            _profilePhotoPath.length < 2048) {
+          dbAndAuthTasks.add(
+            user.updatePhotoURL(_profilePhotoPath).catchError((e) {
+              debugPrint('Failed to update photo URL in Firebase Auth: $e');
+            }),
+          );
         }
-        await user.reload();
+
+        // Run db/auth updates concurrently and then reload user
+        saveTasks.add(Future.wait(dbAndAuthTasks).then((_) => user.reload()));
       }
+
+      // Await all parallel saving tasks
+      await Future.wait(saveTasks);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -241,8 +302,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         imageQuality: 85,
       );
       if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        final base64String = 'data:image/jpeg;base64,${base64Encode(bytes)}';
         setState(() {
-          _profilePhotoPath = pickedFile.path;
+          _profilePhotoPath = base64String;
         });
       }
     } catch (e) {
@@ -273,8 +336,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         imageQuality: 85,
       );
       if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        final base64String = 'data:image/jpeg;base64,${base64Encode(bytes)}';
         setState(() {
-          _bannerPhotoPath = pickedFile.path;
+          _bannerPhotoPath = base64String;
         });
       }
     } catch (e) {

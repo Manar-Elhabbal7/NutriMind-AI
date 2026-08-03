@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "563646488257-g7eh9ono4hb5v3lprh463e26g6v4dbiq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nutri_mind",
+            "certificate_hash": "c89ac2461789fea32426b0e34bc8680794213f52"
+          }
+        },
+        {
           "client_id": "563646488257-f9cssid1l71s3l8elrn18g24p7sevs86.apps.googleusercontent.com",
           "client_type": 3
         }

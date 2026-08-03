@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,16 @@ class ProfileHeader extends StatelessWidget {
   ImageProvider _buildImageProvider(String path, bool isProfile) {
     if (path.isEmpty) {
       return AssetImage(isProfile ? _defaultProfilePhoto : _defaultBannerPhoto);
+    }
+
+    if (path.startsWith('data:image/') || path.contains(';base64,')) {
+      final base64String = path.contains(',') ? path.split(',').last : path;
+      try {
+        return MemoryImage(base64Decode(base64String));
+      } catch (e) {
+        debugPrint('Error decoding base64 image: $e');
+        return AssetImage(isProfile ? _defaultProfilePhoto : _defaultBannerPhoto);
+      }
     }
 
     if (path.startsWith('assets/')) {

@@ -51,7 +51,12 @@ class AuthService {
 
   /// Sign In with Google
   Future<UserCredential?> signInWithGoogle() async {
-    // Trigger Google Sign-In flow
+    if (kIsWeb) {
+      final GoogleAuthProvider authProvider = GoogleAuthProvider();
+      return await _auth.signInWithPopup(authProvider);
+    }
+
+    // Trigger Google Sign-In flow for Mobile
     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
     if (googleUser == null) return null;
 

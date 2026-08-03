@@ -80,30 +80,34 @@ class NotificationService {
         prefs.getBool('water_reminder_enabled') ?? true; // default to true
     if (!isEnabled) return;
 
+    final List<Future<void>> scheduleFutures = [];
     // Schedule 60 notifications (every 3 hours, covering 7.5 days)
     for (int i = 1; i <= 60; i++) {
       final scheduledTime = tz.TZDateTime.now(
         tz.local,
       ).add(Duration(hours: 3 * i));
 
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        id: i,
-        title: 'Stay Hydrated! 💧',
-        body: 'Time to drink some water and stay healthy!',
-        scheduledDate: scheduledTime,
-        notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'water_reminder_channel',
-            'Water Reminders',
-            channelDescription: 'Channel for daily water intake reminders',
-            importance: Importance.high,
-            priority: Priority.high,
+      scheduleFutures.add(
+        flutterLocalNotificationsPlugin.zonedSchedule(
+          id: i,
+          title: 'Stay Hydrated! 💧',
+          body: 'Time to drink some water and stay healthy!',
+          scheduledDate: scheduledTime,
+          notificationDetails: const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'water_reminder_channel',
+              'Water Reminders',
+              channelDescription: 'Channel for daily water intake reminders',
+              importance: Importance.high,
+              priority: Priority.high,
+            ),
+            iOS: DarwinNotificationDetails(),
           ),
-          iOS: DarwinNotificationDetails(),
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
     }
+    await Future.wait(scheduleFutures);
   }
 
   Future<void> cancelAllNotifications() async {
