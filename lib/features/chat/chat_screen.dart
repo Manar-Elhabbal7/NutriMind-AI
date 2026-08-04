@@ -204,11 +204,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
 
       setState(() {
         _messages.add(
-          ChatMessage(
-            text: botReply,
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
+          ChatMessage(text: botReply, isUser: false, timestamp: DateTime.now()),
         );
       });
     } on DioException catch (e) {

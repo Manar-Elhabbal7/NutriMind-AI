@@ -46,7 +46,9 @@ void main() async {
     }
   } catch (e) {
     if (kIsWeb) {
-      debugPrint('Firebase Web initialization failed (running in offline/blocked mode): $e');
+      debugPrint(
+        'Firebase Web initialization failed (running in offline/blocked mode): $e',
+      );
     } else {
       try {
         // Platform-specific fallback options on Mobile
