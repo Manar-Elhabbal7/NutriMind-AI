@@ -45,28 +45,29 @@ void main() async {
       await Firebase.initializeApp();
     }
   } catch (e) {
-    try {
-      if (kIsWeb) {
-        rethrow;
+    if (kIsWeb) {
+      debugPrint('Firebase Web initialization failed (running in offline/blocked mode): $e');
+    } else {
+      try {
+        // Platform-specific fallback options on Mobile
+        final isAndroid = defaultTargetPlatform == TargetPlatform.android;
+        await Firebase.initializeApp(
+          options: FirebaseOptions(
+            apiKey: isAndroid
+                ? 'AIzaSyANN9QwWbgRz1b-N7eEHNoMek0EdBAlr-w'
+                : 'AIzaSyBiL7q6cgy5iiZg5lPXjzS6fm6eAZIL_r8',
+            appId: isAndroid
+                ? '1:563646488257:android:80301046032e74206cbe40'
+                : '1:563646488257:ios:90446bbdb14a53f86cbe40',
+            messagingSenderId: '563646488257',
+            projectId: 'nutrimind-ec817',
+            storageBucket: 'nutrimind-ec817.firebasestorage.app',
+            iosBundleId: isAndroid ? null : 'com.example.nutriMind',
+          ),
+        );
+      } catch (e2) {
+        debugPrint('Firebase initialization failed: $e2');
       }
-      // Platform-specific fallback options on Mobile
-      final isAndroid = defaultTargetPlatform == TargetPlatform.android;
-      await Firebase.initializeApp(
-        options: FirebaseOptions(
-          apiKey: isAndroid
-              ? 'AIzaSyANN9QwWbgRz1b-N7eEHNoMek0EdBAlr-w'
-              : 'AIzaSyBiL7q6cgy5iiZg5lPXjzS6fm6eAZIL_r8',
-          appId: isAndroid
-              ? '1:563646488257:android:80301046032e74206cbe40'
-              : '1:563646488257:ios:90446bbdb14a53f86cbe40',
-          messagingSenderId: '563646488257',
-          projectId: 'nutrimind-ec817',
-          storageBucket: 'nutrimind-ec817.firebasestorage.app',
-          iosBundleId: isAndroid ? null : 'com.example.nutriMind',
-        ),
-      );
-    } catch (e2) {
-      debugPrint('Firebase initialization failed: $e2');
     }
   }
   runApp(const MyApp());

@@ -31,6 +31,17 @@
 
   <title>nutri_mind</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Import map to resolve local Firebase JS SDK modules -->
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/firebase-app.js": "./firebase/firebase-app.js",
+        "firebase/firebase-auth.js": "./firebase/firebase-auth.js",
+        "firebase/firebase-firestore-pipelines.js": "./firebase/firebase-firestore-pipelines.js"
+      }
+    }
+  </script>
 </head>
 <body>
   <!--

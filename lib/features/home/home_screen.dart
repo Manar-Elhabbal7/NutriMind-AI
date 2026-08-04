@@ -31,7 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String _profilePhotoPath = '';
   String _displayName = 'User';
 
-  // Global keys for highlighting tutorial elements
   final GlobalKey _waterTrackerKey = GlobalKey();
   final GlobalKey _scanKey = GlobalKey();
   final GlobalKey _profileKey = GlobalKey();
