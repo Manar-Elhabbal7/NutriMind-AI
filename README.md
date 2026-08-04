@@ -21,13 +21,12 @@ NutriMind AI is an elegant, feature-rich mobile application built with Flutter t
 
 ## Screens (in light mode)
 
-
 <table>
  <tr>
       <td><img src="https://github.com/user-attachments/assets/c8576883-ba86-4568-b869-97b8a20ac7d1" width="200"/></td>
       <td><img src="https://github.com/user-attachments/assets/30972e7f-43fb-4f55-b023-9fd16fe06263" width="200"/></td>
-      <td><img src="https://github.com/user-attachments/assets/362a6f95-7b80-4566-8ffe-5b4970c7db47" width="200"/></td>
-      <td><img src="https://github.com/user-attachments/assets/d30ece15-631f-4cf8-b7b4-73b79c6dc0dc" width="200"/></td>
+      <td><img src="https://github.com/user-attachments/assets/336c9877-f60d-4963-a649-1a8d16255432" width="200"/></td>
+      <td><img src="https://github.com/user-attachments/assets/4dcc8f28-2666-4d66-8191-dc60bd87cf74" width="200"/></td>
 
  </tr>
  <tr>
@@ -85,12 +84,14 @@ NutriMind AI is an elegant, feature-rich mobile application built with Flutter t
    <td align="center"><b>Recipe Details</b></td>
  </tr>
 </table>
+
+
      
 ---
 
 ## Demo
 
+https://github.com/user-attachments/assets/a744d6a5-cae8-4006-ac0e-694ff1b6df42
 
-https://github.com/user-attachments/assets/e195181d-dcdb-4fb8-97dd-3bb07f887e0c
 
 
