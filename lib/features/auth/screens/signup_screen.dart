@@ -222,7 +222,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Confirm Password',
+                    'Confirm password',
                     style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -230,7 +230,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(height: 3),
                   AppFormField(
                     controller: _confirmPasswordController,
-                    hintText: 'Confirm Password',
+                    hintText: 'Confirm password',
                     obscureText: _obscureConfirmPassword,
                     prefixIcon: const Icon(
                       Icons.lock_outline_rounded,
