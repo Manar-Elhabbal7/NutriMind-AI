@@ -35,14 +35,16 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-     kotlinOptions {
+    kotlinOptions {
         jvmTarget = "17"
     }
+
    
 }
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    implementation("androidx.concurrent:concurrent-futures:1.1.0")
 }
 
 flutter {

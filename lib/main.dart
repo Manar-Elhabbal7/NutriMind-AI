@@ -1,11 +1,13 @@
+import 'dart:async';
 import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'core/theme/app_colors.dart';
-import 'features/splash/splash_view.dart';
-import 'features/home/services/notification_service.dart';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+import 'core/theme/app_colors.dart';
+import 'features/home/services/notification_service.dart';
+import 'features/splash/splash_view.dart';
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   const MyCustomScrollBehavior();
@@ -18,11 +20,34 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
   };
 }
 
+// Global future for Firebase initialization status
+late final Future<void> firebaseInitFuture;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationService.instance.init();
-  await NotificationService.instance.scheduleWaterReminders();
+
+  // Start Firebase initialization in the background with a short timeout so
+  // it doesn't block app startup. If it fails or times out, we log and continue.
+  firebaseInitFuture = _initFirebaseWithTimeout();
+  unawaited(firebaseInitFuture);
+
+  // Run the app inside a guarded zone to catch uncaught errors and avoid
+  // crashing the embedding editor/runtime.
+  runZonedGuarded(
+    () {
+      runApp(const MyApp());
+      unawaited(_initializeNotifications());
+    },
+    (error, stack) {
+      debugPrint('Unhandled error in app: $error');
+      debugPrint('$stack');
+    },
+  );
+}
+
+Future<void> _initFirebaseWithTimeout() async {
   try {
+    const timeout = Duration(seconds: 8);
     if (kIsWeb) {
       const webAppId = String.fromEnvironment(
         'FIREBASE_WEB_APP_ID',
@@ -40,39 +65,43 @@ void main() async {
           storageBucket: 'nutrimind-ec817.firebasestorage.app',
           measurementId: 'G-WMKWGCG936',
         ),
-      );
+      ).timeout(timeout);
     } else {
-      await Firebase.initializeApp();
+      await Firebase.initializeApp().timeout(timeout);
     }
+  } on TimeoutException catch (t) {
+    debugPrint('Firebase initialization timed out: $t');
   } catch (e) {
-    if (kIsWeb) {
-      debugPrint(
-        'Firebase Web initialization failed (running in offline/blocked mode): $e',
-      );
-    } else {
-      try {
-        // Platform-specific fallback options on Mobile
-        final isAndroid = defaultTargetPlatform == TargetPlatform.android;
-        await Firebase.initializeApp(
-          options: FirebaseOptions(
-            apiKey: isAndroid
-                ? 'AIzaSyANN9QwWbgRz1b-N7eEHNoMek0EdBAlr-w'
-                : 'AIzaSyBiL7q6cgy5iiZg5lPXjzS6fm6eAZIL_r8',
-            appId: isAndroid
-                ? '1:563646488257:android:80301046032e74206cbe40'
-                : '1:563646488257:ios:90446bbdb14a53f86cbe40',
-            messagingSenderId: '563646488257',
-            projectId: 'nutrimind-ec817',
-            storageBucket: 'nutrimind-ec817.firebasestorage.app',
-            iosBundleId: isAndroid ? null : 'com.example.nutriMind',
-          ),
-        );
-      } catch (e2) {
-        debugPrint('Firebase initialization failed: $e2');
-      }
+    // Try a fallback initialization on mobile; timeboxed as well.
+    try {
+      final isAndroid = defaultTargetPlatform == TargetPlatform.android;
+      await Firebase.initializeApp(
+        options: FirebaseOptions(
+          apiKey: isAndroid
+              ? 'AIzaSyANN9QwWbgRz1b-N7eEHNoMek0EdBAlr-w'
+              : 'AIzaSyBiL7q6cgy5iiZg5lPXjzS6fm6eAZIL_r8',
+          appId: isAndroid
+              ? '1:563646488257:android:80301046032e74206cbe40'
+              : '1:563646488257:ios:90446bbdb14a53f86cbe40',
+          messagingSenderId: '563646488257',
+          projectId: 'nutrimind-ec817',
+          storageBucket: 'nutrimind-ec817.firebasestorage.app',
+          iosBundleId: isAndroid ? null : 'com.example.nutriMind',
+        ),
+      ).timeout(const Duration(seconds: 6));
+    } catch (e2) {
+      debugPrint('Firebase initialization failed: $e, fallback error: $e2');
     }
   }
-  runApp(const MyApp());
+}
+
+Future<void> _initializeNotifications() async {
+  try {
+    await NotificationService.instance.init();
+    await NotificationService.instance.scheduleWaterReminders();
+  } catch (e) {
+    debugPrint('Notification initialization failed: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {

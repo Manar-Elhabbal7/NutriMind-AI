@@ -4,6 +4,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../auth/screens/login_screen.dart';
+import '../auth/services/auth_service.dart';
+import '../home/home_screen.dart';
+import '../../main.dart';
 import 'widgets/animated_background.dart';
 
 class SplashView extends StatefulWidget {
@@ -19,16 +22,33 @@ class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
     super.initState();
-    _navigatToLoginScreen();
+    _navigateToNextScreen();
   }
 
-  void _navigatToLoginScreen() {
-    _navigateTimer = Timer(const Duration(seconds: 3), () {
+  void _navigateToNextScreen() {
+    _navigateTimer = Timer(const Duration(seconds: 3), () async {
       if (mounted) {
+        try {
+          await firebaseInitFuture;
+        } catch (e) {
+          debugPrint('Firebase initialization failed during splash delay: $e');
+        }
+
+        bool isLoggedIn = false;
+        try {
+          isLoggedIn = AuthService.instance.currentUser != null;
+        } catch (e) {
+          debugPrint('Auth check failed: $e');
+        }
+
+        if (!mounted) return;
+
+        final Widget nextScreen =
+            isLoggedIn ? const HomeScreen() : const LoginScreen();
+
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const LoginScreen(),
+            pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
                   return FadeTransition(opacity: animation, child: child);
