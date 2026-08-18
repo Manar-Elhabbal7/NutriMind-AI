@@ -43,8 +43,9 @@ class _SplashViewState extends State<SplashView> {
 
         if (!mounted) return;
 
-        final Widget nextScreen =
-            isLoggedIn ? const HomeScreen() : const LoginScreen();
+        final Widget nextScreen = isLoggedIn
+            ? const HomeScreen()
+            : const LoginScreen();
 
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
